@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set-Piece Strike | Barbarian System | Hove RFC</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&amp;family=Space+Mono:wght@400;700&amp;family=Inter:wght@300;400;600&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style id="core-styles">
+        /* Elite Brutalist Aesthetics */
+        body {
+            background-color: #070707;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .font-oswald { font-family: 'Oswald', sans-serif; }
+        .font-mono-tech { font-family: 'Space Mono', monospace; }
+
+        .sharp-box {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #0a0a0a;
+        }
+
+        .hover-target:hover {
+            border-color: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #070707; }
+        ::-webkit-scrollbar-thumb { background: #333; }
+        ::-webkit-scrollbar-thumb:hover { background: #666; }
+
+        /* Coach Edit Mode (activated with ?edit) */
+        #edit-toolbar {
+            position: fixed; bottom: 1rem; right: 1rem; z-index: 50;
+            display: flex; gap: .5rem; align-items: center;
+            font-family: 'Space Mono', monospace; font-size: 12px;
+        }
+        #edit-toolbar button {
+            border: 1px solid #444; background: #0a0a0a; color: #ccc;
+            padding: .5rem .75rem; text-transform: uppercase;
+            letter-spacing: .1em; cursor: pointer;
+        }
+        #edit-toolbar button:hover { border-color: #fff; color: #fff; }
+        #edit-toolbar button.armed { border-color: #b91c1c; color: #ef4444; }
+        #edit-toolbar .status { color: #418fde; letter-spacing: .1em; text-transform: uppercase; min-width: 70px; text-align: right; }
+        [contenteditable="true"] { outline: 1px dashed rgba(65, 143, 222, .55); outline-offset: 4px; }
+
+        /* Logo sizing that works even if the CDN stylesheet is unavailable */
+        .logo-box { width: 6rem; }
+        @media (min-width: 768px) { .logo-box { width: 8rem; } }
+        .logo-box img { width: 100%; height: auto; }
+
+        /* Play selector nav */
+        #play-nav { position: sticky; top: 0; z-index: 30; background: #070707; border-bottom: 1px solid rgba(255,255,255,.1); }
+        #play-nav .inner { display: flex; gap: .5rem; flex-wrap: wrap; }
+        #play-nav .pnav {
+            font-family: 'Space Mono', monospace; font-size: 11px; text-transform: uppercase;
+            letter-spacing: .12em; color: #a3a3a3; border: 1px solid #333; padding: .5rem .8rem;
+            cursor: pointer; white-space: nowrap; transition: all .15s ease;
+        }
+        #play-nav .pnav:hover { color: #fff; border-color: #666; }
+        #play-nav .pnav.nav-active { color: #418fde; border-color: #418fde; background: rgba(65,143,222,.1); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative overflow-x-hidden selection:bg-blue-700 selection:text-white">
+
+    <header class="relative z-20 border-b border-white/10 bg-[#070707]">
+        <div class="container mx-auto px-6 py-6 lg:px-12">
+            <div class="flex items-center justify-between">
+                <div class="logo-box flex items-center w-24 md:w-32">
+                    <img src="https://nlcperformance.github.io/HOVERFC-DEFENCE/Hove%20rfc%20new.png" alt="Hove RFC Logo" class="w-full h-auto object-contain drop-shadow-2xl">
+                </div>
+
+                <div class="text-right mt-2 md:mt-0">
+                    <p class="font-mono-tech font-bold text-neutral-300 text-xs sm:text-sm uppercase tracking-widest mb-2">Barbarian System // Lineout Attack</p>
+                    <h1 class="text-4xl sm:text-5xl md:text-6xl font-oswald font-bold tracking-tighter uppercase text-white leading-none">
+                        Set-Piece<br class="sm:hidden"> <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#418fde] to-[#0a1128]">Strike</span>
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav id="play-nav">
+        <div class="container mx-auto px-6 lg:px-12 py-3">
+            <div class="inner">
+                <a href="#all" data-play="all" class="pnav">All Plays</a>
+                <a href="#harlequins" data-play="harlequins" class="pnav">Harlequins</a>
+                <a href="#bath" data-play="bath" class="pnav">Bath</a>
+                <a href="#toulouse" data-play="toulouse" class="pnav">Toulouse</a>
+                <a href="#larochelle" data-play="larochelle" class="pnav">La Rochelle</a>
+                <a href="#therec" data-play="therec" class="pnav">The Rec</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10 flex-grow">
+
+        <!-- Back link -->
+        <div class="container mx-auto px-6 lg:px-12 pt-6">
+            <a href="index.html" class="font-mono-tech text-xs uppercase tracking-widest text-neutral-500 hover:text-white">&larr; Barbarian System // Main Protocol</a>
+        </div>
+
+
+        <!-- Diagram key -->
+        <div class="container mx-auto px-6 lg:px-12 pt-8">
+            <div class="sharp-box p-4 flex flex-wrap gap-x-8 gap-y-2 items-center font-mono-tech text-xs uppercase tracking-wider text-neutral-400">
+                <span class="text-neutral-600">Key //</span>
+                <span class="flex items-center gap-2"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid #e5e5e5"></span> Player</span>
+                <span class="flex items-center gap-2"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#418fde"></span> Carry pod</span>
+                <span class="flex items-center gap-2"><span style="display:inline-block;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid #ef4444"></span> Lifting pod</span>
+                <span class="flex items-center gap-2"><span style="display:inline-block;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid #418fde"></span> Non-lifters</span>
+                <span class="flex items-center gap-2"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;border:2px dashed #fff"></span> Ruck</span>
+                <span class="flex items-center gap-2"><span style="display:inline-block;width:14px;height:14px;background:#e5e5e5;color:#070707;font-weight:bold;text-align:center;line-height:14px">1</span> Sequence</span>
+                <span class="flex items-center gap-2"><span style="display:inline-block;width:22px;border-top:3px solid #418fde"></span> Ball carry</span>
+                <span class="flex items-center gap-2"><span style="display:inline-block;width:22px;border-top:2px dashed #a3a3a3"></span> Support run</span>
+            </div>
+        </div>
+
+        <!-- ============ 01 HARLEQUINS ============ -->
+        <section id="harlequins" class="py-16 border-b border-white/5">
+            <div class="container mx-auto px-6 lg:px-12">
+                <div class="flex items-end gap-4 mb-3">
+                    <span class="font-mono-tech text-[#418fde] text-sm">01</span>
+                    <h2 class="font-oswald text-5xl md:text-7xl font-bold uppercase tracking-tighter text-white leading-none">Harlequins</h2>
+                    <div class="border border-[#b91c1c]/30 text-[#b91c1c] text-xs font-mono-tech px-2 py-1 uppercase bg-[#b91c1c]/10 mb-1">Lineout Strike</div>
+                </div>
+                <p class="font-mono-tech text-neutral-500 text-sm uppercase tracking-widest mb-3">Open carry // Make them chase</p>
+                <p class="text-neutral-300 font-inter text-lg font-light mb-8 max-w-3xl">Pull the defence to the open side with a hard carry &mdash; then strike back at the short side they've abandoned.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="sharp-box p-2">
+                        <svg class="w-full h-auto" style="width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" id="svg-harlequins" viewBox="0 0 700 900" font-family="monospace">
+  <defs>
+    <marker id="ah-b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#418fde"/></marker>
+    <marker id="ah-w" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#e5e5e5"/></marker>
+    <marker id="ah-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#9ca3af"/></marker>
+  </defs>
+  <rect width="700" height="900" fill="#0a0a0a"/>
+
+  <line x1="46" y1="30" x2="46" y2="870" stroke="#ffffff" stroke-opacity="0.5" stroke-width="3"/>
+  <line x1="92" y1="30" x2="92" y2="870" stroke="#ffffff" stroke-opacity="0.12" stroke-width="1.4" stroke-dasharray="10 9"/>
+  <text x="52" y="24" fill="#6b6b6b" font-size="12">TOUCH</text>
+  <text x="98" y="864" fill="#4a4a4a" font-size="10">5M</text>
+  <path d="M645 130 V 62" stroke="#737373" stroke-width="2" marker-end="url(#ah-g)"/>
+  <text x="633" y="150" fill="#8a8a8a" font-size="11" text-anchor="end">DIRECTION OF ATTACK</text>
+
+  <circle cx="110" cy="540" r="11" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="150" cy="540" r="11" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="190" cy="540" r="11" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="230" cy="540" r="11" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="270" cy="540" r="11" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <text x="150" y="586" fill="#8a8a8a" font-size="11" text-anchor="middle">LINEOUT</text>
+
+  <text x="150" y="430" fill="#5aa2e6" font-size="12" font-weight="bold">6 &amp; 8 CARRY OPEN, MAKE THEM CHASE</text>
+
+  <circle cx="464" cy="390" r="14" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="4 4"/>
+
+  <path d="M300 498 l18 30 h-36 z" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+  <text x="326" y="512" fill="#f87171" font-size="11">LIFTING POD STAYS</text>
+
+  <path d="M300 496 C 356 452 418 418 452 400" fill="none" stroke="#e5e5e5" stroke-width="2" stroke-dasharray="5 6" marker-end="url(#ah-w)"/>
+  <text x="486" y="382" fill="#c7c7c7" font-size="11">BACK-OF-LINEOUT</text>
+  <text x="486" y="396" fill="#c7c7c7" font-size="11">FORWARD HITS RUCK</text>
+
+  <circle cx="300" cy="600" r="15" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/>
+  <text x="300" y="605" fill="#ffffff" font-size="13" text-anchor="middle" font-weight="bold">9</text>
+
+  <circle cx="352" cy="652" r="15" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/>
+  <text x="352" y="657" fill="#ffffff" font-size="13" text-anchor="middle" font-weight="bold">10</text>
+  <circle cx="424" cy="668" r="15" fill="#418fde"/>
+  <text x="424" y="673" fill="#070707" font-size="13" text-anchor="middle" font-weight="bold">8</text>
+  <circle cx="462" cy="668" r="15" fill="#418fde"/>
+  <text x="462" y="673" fill="#070707" font-size="13" text-anchor="middle" font-weight="bold">6</text>
+  <circle cx="540" cy="684" r="15" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/>
+  <text x="540" y="689" fill="#ffffff" font-size="13" text-anchor="middle" font-weight="bold">13</text>
+  <circle cx="614" cy="706" r="15" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/>
+  <text x="614" y="711" fill="#ffffff" font-size="13" text-anchor="middle" font-weight="bold">14</text>
+
+  <path d="M314 608 L 338 640" stroke="#e5e5e5" stroke-width="2.5" marker-end="url(#ah-w)"/>
+  <path d="M368 656 L 406 664" stroke="#e5e5e5" stroke-width="2.5" marker-end="url(#ah-w)"/>
+  <path d="M444 652 C 458 560 462 470 464 406" stroke="#418fde" stroke-width="3.5" fill="none" marker-end="url(#ah-b)"/>
+  <path d="M540 669 L 540 624" stroke="#e5e5e5" stroke-width="2" stroke-dasharray="5 6" marker-end="url(#ah-w)"/>
+  <path d="M614 691 L 614 646" stroke="#e5e5e5" stroke-width="2" stroke-dasharray="5 6" marker-end="url(#ah-w)"/>
+
+  <path d="M340 642 C 330 592 322 552 316 526" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="6 7" marker-end="url(#ah-b)"/>
+  <text x="120" y="474" fill="#6cc4f5" font-size="11">10: OPTION OFF LIFTING POD</text>
+
+  <path d="M274 555 C 380 665 478 718 532 652 C 558 612 566 562 570 500" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="4 6" marker-end="url(#ah-g)"/>
+  <text x="150" y="748" fill="#a3a3a3" font-size="11">NON-LIFTERS WORK ROUND THE CORNER</text>
+
+  <circle cx="58" cy="540" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/>
+  <text x="58" y="545" fill="#ffffff" font-size="13" text-anchor="middle" font-weight="bold">2</text>
+  <path d="M66 553 C 220 760 540 748 632 620 C 646 600 652 580 654 560" fill="none" stroke="#e5e5e5" stroke-width="2" stroke-dasharray="5 6" marker-end="url(#ah-w)"/>
+  <text x="150" y="784" fill="#c7c7c7" font-size="11">HOOKER 2 WORKS OPEN AFTER THE THROW</text>
+
+  <circle cx="205" cy="828" r="15" fill="#0a0a0a" stroke="#facc15" stroke-width="2"/>
+  <text x="205" y="833" fill="#facc15" font-size="13" text-anchor="middle" font-weight="bold">11</text>
+  <circle cx="305" cy="828" r="15" fill="#0a0a0a" stroke="#facc15" stroke-width="2"/>
+  <text x="305" y="833" fill="#facc15" font-size="13" text-anchor="middle" font-weight="bold">15</text>
+  <circle cx="405" cy="828" r="15" fill="#0a0a0a" stroke="#facc15" stroke-width="2"/>
+  <text x="405" y="833" fill="#facc15" font-size="13" text-anchor="middle" font-weight="bold">12</text>
+  <text x="230" y="868" fill="#facc15" font-size="11">11 · 15 · 12 ATTACK BLIND</text>
+</svg>
+                    </div>
+                    <ul class="space-y-4 font-inter text-lg font-light text-neutral-300">
+                        <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">9 passes to 10</strong>; 10 passes to the <strong class="text-white font-bold">6 &amp; 8 pod</strong>, who carry open to make the defence chase.</li>
+                        <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> The forward at the <strong class="text-white font-bold">back of the lineout</strong> hits the breakdown.</li>
+                        <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> Any <strong class="text-white font-bold">non-lifters</strong> work around the corner.</li>
+                        <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> The <strong class="text-white font-bold">lifting pod stays</strong> — 10 is the option off it.</li>
+                        <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> The <strong class="text-white font-bold">hooker works open</strong> after his throw.</li>
+                        <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">11, 15 &amp; 12</strong> attack the blindside.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ 02 BATH ============ -->
+        <section id="bath" class="py-16 border-b border-white/5 bg-[#0a0a0a]">
+            <div class="container mx-auto px-6 lg:px-12">
+                <div class="flex items-end gap-4 mb-3">
+                    <span class="font-mono-tech text-[#418fde] text-sm">02</span>
+                    <h2 class="font-oswald text-5xl md:text-7xl font-bold uppercase tracking-tighter text-white leading-none">Bath</h2>
+                    <div class="border border-[#2563eb]/30 text-[#3b82f6] text-xs font-mono-tech px-2 py-1 uppercase bg-[#2563eb]/10 mb-1">Lineout Strike</div>
+                </div>
+                <p class="font-mono-tech text-neutral-500 text-sm uppercase tracking-widest mb-3">Against the grain // Then backs move</p>
+                <p class="text-neutral-300 font-inter text-lg font-light mb-8 max-w-3xl">Carry back against the grain to bunch the defence and secure it tight &mdash; then swing the ball into a backs move, everyone working open.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="sharp-box p-2">
+                        <svg class="w-full h-auto" style="width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" id="svg-bath" viewBox="0 0 700 860" font-family="monospace">
+  <defs>
+    <marker id="bb-b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#418fde"/></marker>
+    <marker id="bb-w" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#e5e5e5"/></marker>
+    <marker id="bb-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#9ca3af"/></marker>
+    <marker id="bb-r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#ef4444"/></marker>
+  </defs>
+  <rect width="700" height="860" fill="#0a0a0a"/>
+
+  <line x1="46" y1="30" x2="46" y2="830" stroke="#ffffff" stroke-opacity="0.5" stroke-width="3"/>
+  <line x1="92" y1="30" x2="92" y2="830" stroke="#ffffff" stroke-opacity="0.12" stroke-width="1.4" stroke-dasharray="10 9"/>
+  <text x="52" y="24" fill="#6b6b6b" font-size="12">TOUCH</text>
+  <text x="98" y="824" fill="#4a4a4a" font-size="10">5M</text>
+  <path d="M645 130 V 62" stroke="#737373" stroke-width="2" marker-end="url(#bb-g)"/>
+  <text x="633" y="150" fill="#8a8a8a" font-size="11" text-anchor="end">DIRECTION OF ATTACK</text>
+
+  <!-- lineout -->
+  <circle cx="110" cy="540" r="11" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="150" cy="540" r="11" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="190" cy="540" r="11" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="230" cy="540" r="11" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="270" cy="540" r="11" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <text x="150" y="586" fill="#8a8a8a" font-size="11" text-anchor="middle">LINEOUT</text>
+
+  <!-- carry label -->
+  <text x="110" y="336" fill="#5aa2e6" font-size="12" font-weight="bold">8&amp;6 CARRY BACK AGAINST THE GRAIN, MAKE THEM BUNCH</text>
+
+  <!-- 9 -->
+  <circle cx="300" cy="590" r="15" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/>
+  <text x="300" y="595" fill="#ffffff" font-size="13" text-anchor="middle" font-weight="bold">9</text>
+  <path d="M315 582 L 352 518" stroke="#e5e5e5" stroke-width="2.5" marker-end="url(#bb-w)"/>
+
+  <!-- 8/6 pod carries STRAIGHT -->
+  <circle cx="372" cy="504" r="15" fill="#418fde"/>
+  <text x="372" y="509" fill="#070707" font-size="13" text-anchor="middle" font-weight="bold">8</text>
+  <circle cx="410" cy="504" r="15" fill="#418fde"/>
+  <text x="410" y="509" fill="#070707" font-size="13" text-anchor="middle" font-weight="bold">6</text>
+  <path d="M394 488 L 402 400" stroke="#418fde" stroke-width="3.5" fill="none" marker-end="url(#bb-b)"/>
+
+  <!-- ruck / breakdown -->
+  <circle cx="404" cy="388" r="14" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="4 4"/>
+
+  <!-- back-of-lineout forward hits ruck -->
+  <path d="M280 528 C 326 470 372 420 392 400" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="5 6" marker-end="url(#bb-g)"/>
+  <text x="440" y="356" fill="#a3a3a3" font-size="11">BACK-OF-LINEOUT</text>
+  <text x="440" y="370" fill="#a3a3a3" font-size="11">FORWARD HITS RUCK</text>
+
+  <!-- LIFTING POD + HOOKER run UNDER the 8&6, finish just the other side of the breakdown -->
+  <path d="M150 498 l18 30 h-36 z" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+  <!-- lifting pod (red) -->
+  <path d="M170 512 C 256 556 344 566 398 556 C 448 542 452 408 410 366" fill="none" stroke="#ef4444" stroke-width="2.6" stroke-dasharray="6 7" marker-end="url(#bb-r)"/>
+  <!-- hooker (white) joins under the pod, ends the same place -->
+  <circle cx="58" cy="540" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/>
+  <text x="58" y="545" fill="#ffffff" font-size="13" text-anchor="middle" font-weight="bold">2</text>
+  <path d="M72 547 C 150 560 250 558 322 562 C 436 568 470 414 420 368" fill="none" stroke="#e5e5e5" stroke-width="2" stroke-dasharray="5 6" marker-end="url(#bb-w)"/>
+  <text x="150" y="652" fill="#f87171" font-size="11" font-weight="bold">LIFTING POD &amp; HOOKER WORK AROUND THE CORNER,</text>
+  <text x="150" y="668" fill="#f87171" font-size="11" font-weight="bold">CARRYING TIGHT TO THE BREAKDOWN</text>
+
+  <!-- ===== BACKS MOVE — all working open ===== -->
+  <circle cx="452" cy="556" r="15" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/>
+  <text x="452" y="561" fill="#ffffff" font-size="13" text-anchor="middle" font-weight="bold">10</text>
+  <circle cx="518" cy="584" r="15" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/>
+  <text x="518" y="589" fill="#ffffff" font-size="13" text-anchor="middle" font-weight="bold">12</text>
+  <circle cx="582" cy="612" r="15" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/>
+  <text x="582" y="617" fill="#ffffff" font-size="13" text-anchor="middle" font-weight="bold">13</text>
+  <circle cx="646" cy="640" r="15" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/>
+  <text x="646" y="645" fill="#ffffff" font-size="13" text-anchor="middle" font-weight="bold">14</text>
+  <circle cx="586" cy="694" r="15" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/>
+  <text x="586" y="699" fill="#ffffff" font-size="13" text-anchor="middle" font-weight="bold">15</text>
+  <circle cx="664" cy="716" r="15" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/>
+  <text x="664" y="721" fill="#ffffff" font-size="13" text-anchor="middle" font-weight="bold">11</text>
+  <path d="M464 549 L 494 522" stroke="#e5e5e5" stroke-width="2" stroke-dasharray="5 6" marker-end="url(#bb-w)"/>
+  <path d="M530 577 L 560 550" stroke="#e5e5e5" stroke-width="2" stroke-dasharray="5 6" marker-end="url(#bb-w)"/>
+  <path d="M594 605 L 624 578" stroke="#e5e5e5" stroke-width="2" stroke-dasharray="5 6" marker-end="url(#bb-w)"/>
+  <path d="M658 633 L 686 608" stroke="#e5e5e5" stroke-width="2" stroke-dasharray="5 6" marker-end="url(#bb-w)"/>
+  <path d="M598 687 L 626 662" stroke="#e5e5e5" stroke-width="2" stroke-dasharray="5 6" marker-end="url(#bb-w)"/>
+  <text x="150" y="722" fill="#c7c7c7" font-size="12" font-weight="bold">BACKS WORK OPEN INTO A BACKS MOVE</text>
+</svg>
+                    </div>
+                    <ul class="space-y-4 font-inter text-lg font-light text-neutral-300">
+                        <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">9 passes straight to the 8 &amp; 6 pod</strong>, who carry back against the grain to make the defence bunch.</li>
+                        <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> The forward at the <strong class="text-white font-bold">back of the lineout</strong> hits the ruck.</li>
+                        <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> The <strong class="text-white font-bold">lifting pod &amp; hooker</strong> work around the corner, carrying tight to the breakdown.</li>
+                        <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> The <strong class="text-white font-bold">backs then work open</strong> into a backs move.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ 03 TOULOUSE ============ -->
+        <section id="toulouse" class="py-16 border-b border-white/5">
+            <div class="container mx-auto px-6 lg:px-12">
+                <div class="flex items-end gap-4 mb-3">
+                    <span class="font-mono-tech text-[#418fde] text-sm">03</span>
+                    <h2 class="font-oswald text-5xl md:text-7xl font-bold uppercase tracking-tighter text-white leading-none">Toulouse</h2>
+                    <div class="bg-white text-black text-xs font-mono-tech px-2 py-1 uppercase font-bold mb-1">Phase Strike // Bingo</div>
+                </div>
+                <p class="font-mono-tech text-neutral-500 text-sm uppercase tracking-widest mb-3">Bingo out to the far side // Then back across</p>
+                <p class="text-neutral-300 font-inter text-lg font-light mb-8 max-w-3xl">Work the ball out to the far side with the Bingo shape &mdash; forwards running hard, ball out the back &mdash; then wash it straight back across the field with a second Bingo wave to finish on the short side.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start mb-10">
+                    <div class="sharp-box p-2">
+                        <svg class="w-full h-auto" style="width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" id="svg-toulouse" viewBox="0 0 1060 640" font-family="monospace">
+  <defs>
+    <marker id="bt-b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#418fde"/></marker>
+    <marker id="bt-w" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#e5e5e5"/></marker>
+    <marker id="bt-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#9ca3af"/></marker>
+    <marker id="bt-o" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#fb923c"/></marker>
+    <marker id="bt-p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#f472b6"/></marker>
+  </defs>
+  <rect width="1060" height="640" fill="#0a0a0a"/>
+
+  <line x1="46" y1="24" x2="46" y2="614" stroke="#ffffff" stroke-opacity="0.5" stroke-width="3"/>
+  <text x="52" y="20" fill="#6b6b6b" font-size="12">TOUCH</text>
+  <path d="M1016 470 V 402" stroke="#737373" stroke-width="2" marker-end="url(#bt-g)"/>
+  <text x="1010" y="490" fill="#8a8a8a" font-size="11" text-anchor="end">DIRECTION OF ATTACK</text>
+
+  <line x1="46" y1="330" x2="1010" y2="330" stroke="#525252" stroke-width="1.4" stroke-dasharray="3 6"/>
+
+  <circle cx="90" cy="330" r="10" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="124" cy="330" r="10" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="158" cy="330" r="10" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="192" cy="330" r="10" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="226" cy="330" r="10" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <text x="130" y="308" fill="#8a8a8a" font-size="11" text-anchor="middle">LINEOUT</text>
+
+  <text x="120" y="614" fill="#c7c7c7" font-size="12" font-weight="bold">1 // BALL WORKS LEFT TO RIGHT — 9, 10, F, 12, F, 13, 14, 15</text>
+
+  <circle cx="282" cy="360" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="282" y="365" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">9</text>
+  <path d="M296 368 L 338 386" stroke="#e5e5e5" stroke-width="2.5" marker-end="url(#bt-w)"/>
+
+  <circle cx="352" cy="394" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="352" y="399" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">10</text>
+
+  <circle cx="412" cy="418" r="13" fill="#418fde"/><text x="412" y="423" fill="#070707" font-size="12" text-anchor="middle" font-weight="bold">F</text>
+  <path d="M406 406 L 372 362" stroke="#418fde" stroke-width="3" marker-end="url(#bt-b)"/>
+
+  <path d="M366 400 C 400 420 438 424 456 422" fill="none" stroke="#e5e5e5" stroke-width="2.5" marker-end="url(#bt-w)"/>
+  <circle cx="470" cy="424" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="470" y="429" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">12</text>
+
+  <circle cx="528" cy="448" r="13" fill="#418fde"/><text x="528" y="453" fill="#070707" font-size="12" text-anchor="middle" font-weight="bold">F</text>
+  <path d="M522 436 L 490 392" stroke="#418fde" stroke-width="3" marker-end="url(#bt-b)"/>
+
+  <path d="M484 432 C 516 452 552 458 570 456" fill="none" stroke="#e5e5e5" stroke-width="2.5" marker-end="url(#bt-w)"/>
+  <circle cx="584" cy="458" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="584" y="463" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">13</text>
+
+  <path d="M598 466 L 634 488" stroke="#e5e5e5" stroke-width="2.5" marker-end="url(#bt-w)"/>
+  <circle cx="648" cy="494" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="648" y="499" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">14</text>
+
+  <path d="M662 502 L 698 524" stroke="#e5e5e5" stroke-width="2.5" marker-end="url(#bt-w)"/>
+  <circle cx="712" cy="530" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="712" y="535" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">15</text>
+
+  <path d="M724 520 C 842 476 918 320 930 176" fill="none" stroke="#e5e5e5" stroke-width="2.2" stroke-dasharray="2 5" marker-end="url(#bt-w)"/>
+
+  <circle cx="935" cy="152" r="15" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="4 4"/>
+  <text x="935" y="120" fill="#c7c7c7" font-size="11" text-anchor="middle">WIDE BREAKDOWN (BD 1)</text>
+  <circle cx="974" cy="176" r="13" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="974" y="181" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">2</text>
+  <path d="M948 160 L 964 170" stroke="#9ca3af" stroke-width="1.8" stroke-dasharray="3 5"/>
+  <text x="1006" y="214" fill="#a3a3a3" font-size="11" text-anchor="end">14, 15 &amp; HOOKER</text>
+  <text x="1006" y="228" fill="#a3a3a3" font-size="11" text-anchor="end">HIT THE BREAKDOWN</text>
+
+  <circle cx="812" cy="152" r="14" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="4 4"/>
+  <text x="812" y="120" fill="#c7c7c7" font-size="11" text-anchor="middle">BD 2</text>
+
+  <path d="M920 148 C 905 128 892 116 882 110" stroke="#fb923c" stroke-width="2.5" fill="none" marker-end="url(#bt-o)"/>
+  <path d="M868 84 l14 22 h-28 z" fill="none" stroke="#418fde" stroke-width="2.5"/>
+  <text x="856" y="78" fill="#5aa2e6" font-size="11" text-anchor="end">NLP</text>
+  <path d="M868 98 C 850 124 826 154 810 172" stroke="#fb923c" stroke-width="2.5" fill="none" marker-end="url(#bt-o)"/>
+
+  <text x="120" y="40" fill="#c7c7c7" font-size="12" font-weight="bold">2 // BINGO BACK RIGHT TO LEFT — 9, 10, F, 12, F, 13, 11</text>
+
+  <circle cx="802" cy="188" r="13" fill="#0a0a0a" stroke="#fb923c" stroke-width="2"/><text x="802" y="193" fill="#fb923c" font-size="11" text-anchor="middle" font-weight="bold">9</text>
+  <path d="M788 194 L 748 202" stroke="#e5e5e5" stroke-width="2.5" marker-end="url(#bt-w)"/>
+
+  <circle cx="732" cy="206" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="732" y="211" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">10</text>
+
+  <circle cx="690" cy="252" r="13" fill="#418fde"/><text x="690" y="257" fill="#070707" font-size="12" text-anchor="middle" font-weight="bold">F</text>
+  <path d="M696 242 L 726 200" stroke="#418fde" stroke-width="3" marker-end="url(#bt-b)"/>
+
+  <path d="M718 214 C 688 232 652 234 640 234" fill="none" stroke="#e5e5e5" stroke-width="2.5" marker-end="url(#bt-w)"/>
+  <circle cx="626" cy="234" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="626" y="239" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">12</text>
+
+  <circle cx="578" cy="252" r="13" fill="#418fde"/><text x="578" y="257" fill="#070707" font-size="12" text-anchor="middle" font-weight="bold">F</text>
+  <path d="M584 242 L 614 200" stroke="#418fde" stroke-width="3" marker-end="url(#bt-b)"/>
+
+  <path d="M612 232 C 584 232 546 232 530 232" fill="none" stroke="#e5e5e5" stroke-width="2.5" marker-end="url(#bt-w)"/>
+  <circle cx="516" cy="232" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="516" y="237" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">13</text>
+
+  <path d="M502 228 C 418 218 288 194 208 184" fill="none" stroke="#f472b6" stroke-width="2.5" stroke-dasharray="6 6" marker-end="url(#bt-p)"/>
+  <circle cx="192" cy="182" r="14" fill="#0a0a0a" stroke="#f472b6" stroke-width="2"/><text x="192" y="187" fill="#f472b6" font-size="12" text-anchor="middle" font-weight="bold">11</text>
+  <text x="120" y="158" fill="#f472b6" font-size="11">11 FINISHES ON THE LEFT</text>
+
+  <circle cx="256" cy="216" r="13" fill="#418fde"/><text x="256" y="221" fill="#070707" font-size="12" text-anchor="middle" font-weight="bold">F</text>
+  <path d="M250 206 L 216 168" stroke="#418fde" stroke-width="3" marker-end="url(#bt-b)"/>
+  <text x="284" y="230" fill="#5aa2e6" font-size="11">FORWARD OUT WITH 11</text>
+</svg>
+                    </div>
+                    <div>
+                        <ul class="space-y-4 font-inter text-lg font-light text-neutral-300 mb-8">
+                            <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">Wave 1 &mdash; ball works left to right</strong> out to the far side. Forwards run hard lines up and back against the ball, and it's played <strong class="text-white font-bold">out the back</strong> at each link: 9, 10, F, 12, F, 13, 14, 15.</li>
+                            <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">14, 15 &amp; the hooker hit the wide breakdown</strong> (BD 1) on the far side.</li>
+                            <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">9 scoots off BD 1</strong>, taking the non-lifting pod (NLP) option through to <strong class="text-white font-bold">breakdown 2</strong>, just back in from the touchline.</li>
+                            <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">Wave 2 &mdash; the same Bingo shape washes back right to left</strong>: 9, 10, F, 12, F, 13, with 12 &amp; 13 sitting deep. <strong class="text-white font-bold">11 finishes on the left</strong> with a forward out in support.</li>
+                        </ul>
+
+                        <!-- Role assignments -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono-tech text-sm">
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">9</span><span class="text-neutral-400"> &mdash; Feeds Wave 1, then scoots off BD 1 through the NLP to BD 2 to launch Wave 2.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">10</span><span class="text-neutral-400"> &mdash; First receiver in both waves; plays out the back off the forward's hard line.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Forwards (F)</span><span class="text-neutral-400"> &mdash; Run hard lines up and back against the ball to fix defenders; ball goes out the back of them.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">12</span><span class="text-neutral-400"> &mdash; Out-the-back receiver; sits deep in Wave 2.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">13</span><span class="text-neutral-400"> &mdash; Out-the-back receiver; sits deep in Wave 2 and feeds 11.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">14, 15 &amp; 2</span><span class="text-neutral-400"> &mdash; 14 &amp; 15 carry Wave 1 to the far side; they and the hooker hit BD 1.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">11</span><span class="text-neutral-400"> &mdash; Finishes Wave 2 on the left, with a forward out in support.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ 04 LA ROCHELLE ============ -->
+        <section id="larochelle" class="py-16 border-b border-white/5 bg-[#0a0a0a]">
+            <div class="container mx-auto px-6 lg:px-12">
+                <div class="flex items-end gap-4 mb-3">
+                    <span class="font-mono-tech text-[#418fde] text-sm">04</span>
+                    <h2 class="font-oswald text-5xl md:text-7xl font-bold uppercase tracking-tighter text-white leading-none">La Rochelle</h2>
+                    <div class="border border-[#eab308]/30 text-[#eab308] text-xs font-mono-tech px-2 py-1 uppercase bg-[#eab308]/10 mb-1">Blindside Strike</div>
+                </div>
+                <p class="font-mono-tech text-neutral-500 text-sm uppercase tracking-widest mb-3">Sell it open // Strike back blind</p>
+                <p class="text-neutral-300 font-inter text-lg font-light mb-8 max-w-3xl">Crash the middle and take the whole pack open to drag their forwards across &mdash; then, while 12, 13 &amp; 11 quietly reload on the blind, swing it straight back to catch them sleeping on the short side.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start mb-10">
+                    <div class="sharp-box p-2">
+                        <svg class="w-full h-auto" style="width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" id="svg-larochelle" viewBox="0 0 1060 640" font-family="monospace">
+  <defs>
+    <marker id="lr-b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#418fde"/></marker>
+    <marker id="lr-w" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#e5e5e5"/></marker>
+    <marker id="lr-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#9ca3af"/></marker>
+    <marker id="lr-o" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#fb923c"/></marker>
+    <marker id="lr-p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#f472b6"/></marker>
+  </defs>
+  <rect width="1060" height="640" fill="#0a0a0a"/>
+
+  <line x1="46" y1="24" x2="46" y2="614" stroke="#ffffff" stroke-opacity="0.5" stroke-width="3"/>
+  <text x="52" y="20" fill="#6b6b6b" font-size="12">TOUCH (BLIND SIDE)</text>
+  <path d="M1016 486 V 418" stroke="#737373" stroke-width="2" marker-end="url(#lr-g)"/>
+  <text x="1010" y="506" fill="#8a8a8a" font-size="11" text-anchor="end">DIRECTION OF ATTACK</text>
+
+  <line x1="46" y1="330" x2="1010" y2="330" stroke="#525252" stroke-width="1.4" stroke-dasharray="3 6"/>
+
+  <text x="120" y="624" fill="#c7c7c7" font-size="12" font-weight="bold">1 // SET-UP &amp; SELL — CRASH 11 UP THE MIDDLE, FORWARDS WORK OPEN</text>
+
+  <circle cx="90" cy="580" r="10" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="124" cy="580" r="10" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="158" cy="580" r="10" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="192" cy="580" r="10" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="226" cy="580" r="10" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <text x="130" y="602" fill="#8a8a8a" font-size="11" text-anchor="middle">LINEOUT (5-MAN)</text>
+
+  <ellipse cx="198" cy="562" rx="52" ry="24" fill="none" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="4 5" opacity="0.6"/>
+  <circle cx="246" cy="558" r="13" fill="#418fde"/><text x="246" y="563" fill="#070707" font-size="12" text-anchor="middle" font-weight="bold">F</text>
+  <text x="150" y="516" fill="#5aa2e6" font-size="11">DUMMY MAUL</text>
+
+  <circle cx="322" cy="548" r="13" fill="#418fde"/><text x="322" y="553" fill="#070707" font-size="12" text-anchor="middle" font-weight="bold">F</text>
+  <path d="M318 538 L 292 476" stroke="#418fde" stroke-width="3" marker-end="url(#lr-b)"/>
+  <text x="150" y="462" fill="#5aa2e6" font-size="11">FORWARD RUNS A BINGO LINE</text>
+
+  <path d="M260 562 C 288 596 306 600 308 598" fill="none" stroke="#e5e5e5" stroke-width="2.5" marker-end="url(#lr-w)"/>
+  <circle cx="322" cy="598" r="12" fill="#0a0a0a" stroke="#fb923c" stroke-width="2"/><text x="322" y="603" fill="#fb923c" font-size="11" text-anchor="middle" font-weight="bold">9</text>
+
+  <path d="M338 592 L 390 572" stroke="#e5e5e5" stroke-width="2.5" marker-end="url(#lr-w)"/>
+  <circle cx="406" cy="566" r="13" fill="#0a0a0a" stroke="#f472b6" stroke-width="2"/><text x="406" y="571" fill="#f472b6" font-size="12" text-anchor="middle" font-weight="bold">11</text>
+  <path d="M414 556 L 468 430" stroke="#f472b6" stroke-width="3.5" fill="none" marker-end="url(#lr-p)"/>
+  <text x="356" y="494" fill="#f472b6" font-size="11">11 CRASHES UP THE MIDDLE</text>
+
+  <circle cx="480" cy="412" r="16" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="4 4"/>
+  <text x="440" y="408" fill="#c7c7c7" font-size="11" text-anchor="end">RUCK 1</text>
+  <circle cx="462" cy="440" r="12" fill="#0a0a0a" stroke="#fb923c" stroke-width="2"/><text x="462" y="445" fill="#fb923c" font-size="10" text-anchor="middle" font-weight="bold">9</text>
+
+  <circle cx="560" cy="488" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="560" y="493" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">12</text>
+  <circle cx="606" cy="518" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="606" y="523" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">13</text>
+  <path d="M548 478 L 494 426" stroke="#e5e5e5" stroke-width="2" stroke-dasharray="5 6" marker-end="url(#lr-w)"/>
+  <path d="M594 508 L 500 430" stroke="#e5e5e5" stroke-width="2" stroke-dasharray="5 6" marker-end="url(#lr-w)"/>
+  <text x="540" y="560" fill="#c7c7c7" font-size="11">12 &amp; 13 HIT RUCK 1</text>
+
+  <path d="M496 402 C 548 360 588 322 610 302" fill="none" stroke="#9ca3af" stroke-width="2.4" stroke-dasharray="6 6" marker-end="url(#lr-g)"/>
+  <path d="M544 356 l17 28 h-34 z" fill="none" stroke="#418fde" stroke-width="2.5"/>
+  <circle cx="584" cy="326" r="13" fill="#418fde"/><text x="584" y="331" fill="#070707" font-size="12" text-anchor="middle" font-weight="bold">F</text>
+  <text x="120" y="430" fill="#a3a3a3" font-size="11">FORWARDS CARRY OFF 9 &amp; WORK OPEN — THE SELL</text>
+  <text x="120" y="446" fill="#8a8a8a" font-size="11">(OPPO FORWARDS FOLLOW OPEN)</text>
+
+  <text x="120" y="40" fill="#c7c7c7" font-size="12" font-weight="bold">2 // STRIKE BACK BLIND — 10 DELAYED UNDER RUCK 2, 12 · 13 · 11 RELOAD BLIND SIDE</text>
+
+  <circle cx="626" cy="272" r="16" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="4 4"/>
+  <text x="650" y="266" fill="#c7c7c7" font-size="11">RUCK 2</text>
+  <text x="650" y="284" fill="#8a8a8a" font-size="10">(BUYS RELOAD TIME)</text>
+  <circle cx="616" cy="296" r="12" fill="#0a0a0a" stroke="#fb923c" stroke-width="2"/><text x="616" y="301" fill="#fb923c" font-size="10" text-anchor="middle" font-weight="bold">9</text>
+
+  <path d="M626 306 L 648 330" stroke="#e5e5e5" stroke-width="2.5" stroke-dasharray="2 6" marker-end="url(#lr-w)"/>
+  <circle cx="662" cy="342" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="662" y="347" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">10</text>
+
+  <path d="M646 348 C 570 372 506 368 462 360" fill="none" stroke="#e5e5e5" stroke-width="2.5" marker-end="url(#lr-w)"/>
+  <circle cx="446" cy="356" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="446" y="361" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">12</text>
+  <circle cx="342" cy="364" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="342" y="369" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">13</text>
+  <circle cx="238" cy="370" r="14" fill="#0a0a0a" stroke="#f472b6" stroke-width="2"/><text x="238" y="375" fill="#f472b6" font-size="12" text-anchor="middle" font-weight="bold">11</text>
+
+  <path d="M228 358 C 200 302 176 252 156 210" fill="none" stroke="#f472b6" stroke-width="3" marker-end="url(#lr-p)"/>
+  <text x="60" y="150" fill="#c7c7c7" font-size="11">12 · 13 · 11 RELOAD ON THE BLIND SIDE</text>
+  <text x="60" y="168" fill="#8a8a8a" font-size="11">NO FORWARDS ON THE BLIND — ATTACK UP THE SHORT SIDE</text>
+
+  <rect x="762" y="44" width="250" height="122" fill="#0a0a0a" stroke="#404040" stroke-width="1.4"/>
+  <text x="782" y="70" fill="#418fde" font-size="13" font-weight="bold">MENU OF CALLS //</text>
+  <text x="782" y="88" fill="#8a8a8a" font-size="10">10 PLAYS WHAT'S IN FRONT</text>
+  <text x="782" y="114" fill="#e5e5e5" font-size="12">▸ BINGO</text>
+  <text x="782" y="136" fill="#e5e5e5" font-size="12">▸ ACE</text>
+  <text x="782" y="158" fill="#e5e5e5" font-size="12">▸ CHIEFS</text>
+</svg>
+                    </div>
+                    <div>
+                        <ul class="space-y-4 font-inter text-lg font-light text-neutral-300 mb-8">
+                            <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">Pure dummy maul.</strong> The catcher shows the maul, then a forward runs a bingo line and the ball is played <strong class="text-white font-bold">out the back to 9</strong>.</li>
+                            <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">9 short to 11</strong>, who crashes up the middle. <strong class="text-white font-bold">12 &amp; 13</strong> hit that breakdown (Ruck 1).</li>
+                            <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">Forwards carry off 9 and work open</strong> to Ruck 2 &mdash; the sell that drags their forwards across and buys the reload time.</li>
+                            <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">10 drops in under Ruck 2</strong> and takes it off 9 on the blind, with <strong class="text-white font-bold">12 · 13 · 11 reloaded on the blind side</strong> &mdash; no forwards there.</li>
+                            <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> They <strong class="text-white font-bold">play what's in front</strong> and attack up the short side &mdash; catching the opposition forwards sleeping.</li>
+                        </ul>
+
+                        <!-- Menu of calls -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono-tech text-sm">
+                            <div class="sharp-box p-4 hover-target text-center"><span class="text-[#418fde] font-bold">BINGO</span></div>
+                            <div class="sharp-box p-4 hover-target text-center"><span class="text-[#418fde] font-bold">ACE</span></div>
+                            <div class="sharp-box p-4 hover-target text-center"><span class="text-[#418fde] font-bold">CHIEFS</span></div>
+                        </div>
+                        <p class="font-mono-tech text-neutral-500 text-xs uppercase tracking-widest mt-3">10 plays what's in front &mdash; the menu of calls off the reload.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ 05 THE REC ============ -->
+        <section id="therec" class="py-16 border-b border-white/5">
+            <div class="container mx-auto px-6 lg:px-12">
+                <div class="flex items-end gap-4 mb-3">
+                    <span class="font-mono-tech text-[#418fde] text-sm">05</span>
+                    <h2 class="font-oswald text-5xl md:text-7xl font-bold uppercase tracking-tighter text-white leading-none">The Rec</h2>
+                    <div class="border border-[#22d3ee]/30 text-[#22d3ee] text-xs font-mono-tech px-2 py-1 uppercase bg-[#22d3ee]/10 mb-1">One-Phase Strike</div>
+                </div>
+                <p class="font-mono-tech text-neutral-500 text-sm uppercase tracking-widest mb-3">Sweep it across // Out the back twice</p>
+                <p class="text-neutral-300 font-inter text-lg font-light mb-8 max-w-3xl">One phase off the same dummy-maul set-up &mdash; two bingo lines hold the fringe defenders while the ball is played out the back each time, sweeping across to a three-way finish.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start mb-10">
+                    <div class="sharp-box p-2">
+                        <svg class="w-full h-auto" style="width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" id="svg-therec" viewBox="0 0 1060 640" font-family="monospace">
+  <defs>
+    <marker id="tr-b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#418fde"/></marker>
+    <marker id="tr-w" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#e5e5e5"/></marker>
+    <marker id="tr-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#9ca3af"/></marker>
+    <marker id="tr-o" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#fb923c"/></marker>
+    <marker id="tr-p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#f472b6"/></marker>
+  </defs>
+  <rect width="1060" height="640" fill="#0a0a0a"/>
+
+  <line x1="46" y1="24" x2="46" y2="614" stroke="#ffffff" stroke-opacity="0.5" stroke-width="3"/>
+  <text x="52" y="20" fill="#6b6b6b" font-size="12">TOUCH</text>
+  <path d="M1016 250 V 178" stroke="#737373" stroke-width="2" marker-end="url(#tr-g)"/>
+  <text x="1010" y="268" fill="#8a8a8a" font-size="11" text-anchor="end">DIRECTION OF ATTACK</text>
+
+  <text x="120" y="612" fill="#c7c7c7" font-size="12" font-weight="bold">THE REC // ONE PHASE</text>
+
+  <circle cx="90" cy="160" r="10" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="124" cy="160" r="10" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="158" cy="160" r="10" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="192" cy="160" r="10" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <circle cx="226" cy="160" r="10" fill="#0a0a0a" stroke="#9ca3af" stroke-width="2"/>
+  <text x="130" y="132" fill="#8a8a8a" font-size="11" text-anchor="middle">LINEOUT (5-MAN)</text>
+
+  <ellipse cx="158" cy="170" rx="86" ry="26" fill="none" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="4 5" opacity="0.6"/>
+  <circle cx="158" cy="190" r="13" fill="#418fde"/><text x="158" y="195" fill="#070707" font-size="12" text-anchor="middle" font-weight="bold">F</text>
+  <text x="244" y="184" fill="#5aa2e6" font-size="11">DUMMY MAUL</text>
+
+  <path d="M170 196 L 326 234" stroke="#e5e5e5" stroke-width="2.5" marker-end="url(#tr-w)"/>
+  <circle cx="340" cy="240" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="340" y="245" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">10</text>
+
+  <circle cx="404" cy="262" r="13" fill="#418fde"/><text x="404" y="267" fill="#070707" font-size="12" text-anchor="middle" font-weight="bold">F</text>
+  <path d="M400 252 L 376 204" stroke="#418fde" stroke-width="3" marker-end="url(#tr-b)"/>
+  <text x="352" y="192" fill="#5aa2e6" font-size="11">FORWARD BINGO LINE OFF 10</text>
+
+  <path d="M340 254 C 336 272 336 282 337 288" fill="none" stroke="#e5e5e5" stroke-width="2.5" marker-end="url(#tr-w)"/>
+  <circle cx="338" cy="302" r="14" fill="#0a0a0a" stroke="#fb923c" stroke-width="2"/><text x="338" y="307" fill="#fb923c" font-size="12" text-anchor="middle" font-weight="bold">9</text>
+
+  <circle cx="410" cy="322" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="410" y="327" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">13</text>
+  <path d="M406 311 L 384 266" stroke="#418fde" stroke-width="3" marker-end="url(#tr-b)"/>
+  <text x="424" y="260" fill="#5aa2e6" font-size="11">13 BINGO LINE OFF 9</text>
+  <path d="M352 308 C 400 340 420 352 430 356" fill="none" stroke="#e5e5e5" stroke-width="2.5" marker-end="url(#tr-w)"/>
+
+  <circle cx="418" cy="362" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="418" y="367" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">12</text>
+  <circle cx="474" cy="398" r="14" fill="#0a0a0a" stroke="#f472b6" stroke-width="2"/><text x="474" y="403" fill="#f472b6" font-size="12" text-anchor="middle" font-weight="bold">11</text>
+  <text x="150" y="452" fill="#9ca3af" font-size="11">9, 12 &amp; 11 FOLD AROUND THE CORNER</text>
+
+  <circle cx="766" cy="392" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="766" y="397" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">15</text>
+  <circle cx="876" cy="376" r="14" fill="#0a0a0a" stroke="#e5e5e5" stroke-width="2"/><text x="876" y="381" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">14</text>
+  <text x="792" y="426" fill="#8a8a8a" font-size="11" text-anchor="middle">14 &amp; 15 HOLD WIDE</text>
+
+  <path d="M432 370 L 458 388" stroke="#e5e5e5" stroke-width="2" stroke-dasharray="4 5" marker-end="url(#tr-w)"/>
+  <path d="M432 366 C 560 392 680 392 752 392" fill="none" stroke="#e5e5e5" stroke-width="2" stroke-dasharray="4 5" marker-end="url(#tr-w)"/>
+  <path d="M428 350 C 548 244 664 190 748 172" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="8 5" marker-end="url(#tr-g)"/>
+  <text x="686" y="158" fill="#a3a3a3" font-size="11">KICK IN BEHIND</text>
+
+  <text x="120" y="486" fill="#8a8a8a" font-size="11">FORWARD BREAKS OFF MAUL AND PASSES TO 10</text>
+  <text x="120" y="524" fill="#c7c7c7" font-size="11">3 OPTIONS OFF 12 — 11 ON A SHOULDER BALL · 15 ON A FLAT PASS · OR A KICK IN BEHIND</text>
+</svg>
+                    </div>
+                    <div>
+                        <ul class="space-y-4 font-inter text-lg font-light text-neutral-300 mb-8">
+                            <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">Dummy maul.</strong> A forward breaks off the maul and passes to 10.</li>
+                            <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> A <strong class="text-white font-bold">forward runs a bingo line off 10</strong>; 10 plays out the back to <strong class="text-white font-bold">9</strong>, who's folded around to the bottom of 10.</li>
+                            <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">13 runs a bingo line off 9</strong>; 9 plays out the back to <strong class="text-white font-bold">12</strong> (12 &amp; 11 folded around the corner).</li>
+                            <li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">14 &amp; 15 hold wide</strong> throughout.</li>
+                        </ul>
+
+                        <!-- Options -->
+                        <div class="grid grid-cols-1 gap-3 font-mono-tech text-sm">
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">11</span><span class="text-neutral-400"> &mdash; on a shoulder ball.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">15</span><span class="text-neutral-400"> &mdash; on a flat pass.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Kick</span><span class="text-neutral-400"> &mdash; in behind.</span></div>
+                        </div>
+                        <p class="font-mono-tech text-neutral-500 text-xs uppercase tracking-widest mt-3">Three options off 12.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="py-12 text-center border-t border-white/10 bg-[#070707]">
+        <div class="container mx-auto px-6">
+            <p class="font-mono-tech text-neutral-600 text-xs tracking-widest uppercase">
+                Hove RFC © 2026 // Barbarian Attack Protocol // Strictly Confidential
+            </p>
+        </div>
+    </footer>
+
+    <script>
+    /* COACH EDIT MODE — open with ?edit on the end of the URL */
+    (function () {
+        var KEY = 'barbarian-edits-v2::' + location.pathname;
+        var REGIONS = ['header', 'main', 'footer'];
+        try {
+            var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+            if (saved) REGIONS.forEach(function (sel) {
+                var el = document.querySelector(sel);
+                if (el && typeof saved[sel] === 'string') el.innerHTML = saved[sel];
+            });
+        } catch (e) {}
+        if (!new URLSearchParams(location.search).has('edit')) return;
+        var editing = false;
+        var bar = document.createElement('div');
+        bar.id = 'edit-toolbar';
+        bar.innerHTML = '<span class="status" id="edit-status"></span>' +
+            '<button id="btn-edit" type="button">Editing: Off</button>' +
+            '<button id="btn-download" type="button">Download HTML</button>' +
+            '<button id="btn-reset" type="button">Reset</button>';
+        document.body.appendChild(bar);
+        var btnEdit = document.getElementById('btn-edit');
+        var btnDownload = document.getElementById('btn-download');
+        var btnReset = document.getElementById('btn-reset');
+        var status = document.getElementById('edit-status');
+        var statusTimer;
+        function flash(msg) {
+            status.textContent = msg;
+            clearTimeout(statusTimer);
+            statusTimer = setTimeout(function () { status.textContent = ''; }, 1800);
+        }
+        function setEditing(on) {
+            editing = on;
+            REGIONS.forEach(function (sel) {
+                var el = document.querySelector(sel);
+                if (el) el.contentEditable = on ? 'true' : 'false';
+            });
+            btnEdit.textContent = on ? 'Editing: On' : 'Editing: Off';
+        }
+        function save() {
+            var data = {};
+            REGIONS.forEach(function (sel) {
+                var el = document.querySelector(sel);
+                if (el) data[sel] = el.innerHTML;
+            });
+            localStorage.setItem(KEY, JSON.stringify(data));
+            flash('Saved');
+        }
+        var saveTimer;
+        document.addEventListener('input', function () {
+            if (!editing) return;
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(save, 400);
+        });
+        btnEdit.addEventListener('click', function () { setEditing(!editing); });
+        btnDownload.addEventListener('click', function () {
+            var wasEditing = editing;
+            if (wasEditing) setEditing(false);
+            save();
+            var doc = document.documentElement.cloneNode(true);
+            doc.querySelectorAll('style:not(#core-styles)').forEach(function (s) { s.remove(); });
+            var tb = doc.querySelector('#edit-toolbar');
+            if (tb) tb.remove();
+            doc.querySelectorAll('[contenteditable]').forEach(function (el) { el.removeAttribute('contenteditable'); });
+            var html = '<!DOCTYPE html>\n' + doc.outerHTML;
+            var blob = new Blob([html], { type: 'text/html' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'playbook.html';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            flash('Exported');
+            if (wasEditing) setEditing(true);
+        });
+        var armed = false, armTimer;
+        btnReset.addEventListener('click', function () {
+            if (!armed) {
+                armed = true;
+                btnReset.textContent = 'Sure?';
+                btnReset.classList.add('armed');
+                armTimer = setTimeout(function () {
+                    armed = false;
+                    btnReset.textContent = 'Reset';
+                    btnReset.classList.remove('armed');
+                }, 3000);
+                return;
+            }
+            clearTimeout(armTimer);
+            localStorage.removeItem(KEY);
+            location.search = 'edit';
+            location.reload();
+        });
+    })();
+    </script>
+
+    <script>
+    /* PLAY FILTER — show a single play (or all) based on the URL hash */
+    (function () {
+        var PLAYS = ['harlequins', 'bath', 'toulouse', 'larochelle', 'therec'];
+        function current() {
+            var h = (location.hash || '').replace('#', '');
+            return PLAYS.indexOf(h) !== -1 ? h : 'all';
+        }
+        function apply() {
+            var id = current(), showAll = (id === 'all');
+            PLAYS.forEach(function (p) {
+                var sec = document.getElementById(p);
+                if (sec) sec.style.display = (showAll || p === id) ? '' : 'none';
+            });
+            var nav = document.getElementById('play-nav');
+            if (nav) nav.querySelectorAll('.pnav').forEach(function (a) {
+                a.classList.toggle('nav-active', a.getAttribute('data-play') === id);
+            });
+            if (!showAll) window.scrollTo(0, 0);
+        }
+        window.addEventListener('hashchange', apply);
+        apply();
+    })();
+    </script>
+
+</body>
+</html>

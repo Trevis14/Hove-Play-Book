@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backs Strike from Scrum | Barbarian System | Hove RFC</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&amp;family=Space+Mono:wght@400;700&amp;family=Inter:wght@300;400;600&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style id="core-styles">
+        /* Elite Brutalist Aesthetics */
+        body {
+            background-color: #070707;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .font-oswald { font-family: 'Oswald', sans-serif; }
+        .font-mono-tech { font-family: 'Space Mono', monospace; }
+
+        .sharp-box {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #0a0a0a;
+        }
+
+        .hover-target:hover {
+            border-color: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #070707; }
+        ::-webkit-scrollbar-thumb { background: #333; }
+        ::-webkit-scrollbar-thumb:hover { background: #666; }
+
+        /* Coach Edit Mode (activated with ?edit) */
+        #edit-toolbar {
+            position: fixed; bottom: 1rem; right: 1rem; z-index: 50;
+            display: flex; gap: .5rem; align-items: center;
+            font-family: 'Space Mono', monospace; font-size: 12px;
+        }
+        #edit-toolbar button {
+            border: 1px solid #444; background: #0a0a0a; color: #ccc;
+            padding: .5rem .75rem; text-transform: uppercase;
+            letter-spacing: .1em; cursor: pointer;
+        }
+        #edit-toolbar button:hover { border-color: #fff; color: #fff; }
+        #edit-toolbar button.armed { border-color: #b91c1c; color: #ef4444; }
+        #edit-toolbar .status { color: #418fde; letter-spacing: .1em; text-transform: uppercase; min-width: 70px; text-align: right; }
+        [contenteditable="true"] { outline: 1px dashed rgba(65, 143, 222, .55); outline-offset: 4px; }
+
+        /* Logo sizing that works even if the CDN stylesheet is unavailable */
+        .logo-box { width: 6rem; }
+        @media (min-width: 768px) { .logo-box { width: 8rem; } }
+        .logo-box img { width: 100%; height: auto; }
+
+        /* Play selector nav */
+        #play-nav { position: sticky; top: 0; z-index: 30; background: #070707; border-bottom: 1px solid rgba(255,255,255,.1); }
+        #play-nav .inner { display: flex; gap: .5rem; flex-wrap: wrap; }
+        #play-nav .pnav {
+            font-family: 'Space Mono', monospace; font-size: 11px; text-transform: uppercase;
+            letter-spacing: .12em; color: #a3a3a3; border: 1px solid #333; padding: .5rem .8rem;
+            cursor: pointer; white-space: nowrap; transition: all .15s ease;
+        }
+        #play-nav .pnav:hover { color: #fff; border-color: #666; }
+        #play-nav .pnav.nav-active { color: #418fde; border-color: #418fde; background: rgba(65,143,222,.1); }
+
+        /* Scrum diagrams — backs plays, so 9 and 11 stay colour-coded */
+        svg.diagram { display: block; width: 100%; height: auto; }
+        .diagram text { font-family: 'Space Mono', monospace; }
+        .diagram .an   { font-size: 12px; letter-spacing: .04em; fill: #8a8a8a; }
+        .diagram .head { font-size: 13px; letter-spacing: .16em; fill: #418fde; }
+        .diagram .head2{ font-size: 11px; letter-spacing: .14em; fill: #6b6b6b; }
+        .diagram .pl circle { fill: #0a0a0a; stroke: #e5e5e5; stroke-width: 2; }
+        .diagram .pl text   { font-size: 15px; font-weight: 700; fill: #ffffff; }
+        .diagram .p-nine circle { stroke: #ff9d2e; } .diagram .p-nine text { fill: #ff9d2e; }
+        .diagram .p-elev circle { stroke: #ff6b9d; } .diagram .p-elev text { fill: #ff6b9d; }
+        .diagram .p-fwd  circle { stroke: #418fde; } .diagram .p-fwd  text { fill: #418fde; }
+        .diagram .scrum rect { fill: rgba(65,143,222,.10); stroke: #418fde; stroke-width: 2; }
+        .diagram .sc-dot { fill: #418fde; }
+        .diagram .sc-lbl { font-size: 11px; letter-spacing: .2em; fill: #418fde; }
+        .diagram .run  { stroke: #e5e5e5; stroke-width: 2; stroke-dasharray: 6 6; fill: none; opacity: .8; }
+        .diagram .opt  { stroke: #9ca3af; stroke-width: 2; stroke-dasharray: 3 7; fill: none; }
+        .diagram .hard { stroke: #418fde; stroke-width: 3.5; fill: none; }
+        .diagram .pass { stroke: #e5e5e5; stroke-width: 2.5; fill: none; }
+        .diagram .touch  { stroke: #ffffff; stroke-opacity: .5; stroke-width: 3; }
+        .diagram .touch-t{ font-size: 11px; letter-spacing: .28em; fill: #6b6b6b; }
+        .diagram .dir    { stroke: #737373; stroke-width: 2; }
+        .diagram .dir-t  { font-size: 10px; letter-spacing: .2em; fill: #8a8a8a; }
+        .diagram .axis   { stroke: rgba(255,255,255,.10); stroke-width: 1; stroke-dasharray: 2 8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative overflow-x-hidden selection:bg-blue-700 selection:text-white">
+
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+        <marker id="ah-run" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#e5e5e5"/></marker>
+        <marker id="ah-pass" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#e5e5e5"/></marker>
+        <marker id="ah-opt" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#9ca3af"/></marker>
+        <marker id="ah-hard" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#418fde"/></marker>
+    </defs></svg>
+
+    <header class="relative z-20 border-b border-white/10 bg-[#070707]">
+        <div class="container mx-auto px-6 py-6 lg:px-12">
+            <div class="flex items-center justify-between">
+                <div class="logo-box flex items-center w-24 md:w-32">
+                    <img src="https://nlcperformance.github.io/HOVERFC-DEFENCE/Hove%20rfc%20new.png" alt="Hove RFC Logo" class="w-full h-auto object-contain drop-shadow-2xl">
+                </div>
+
+                <div class="text-right mt-2 md:mt-0">
+                    <p class="font-mono-tech font-bold text-neutral-300 text-xs sm:text-sm uppercase tracking-widest mb-2">Barbarian System // Scrum Attack</p>
+                    <h1 class="text-4xl sm:text-5xl md:text-6xl font-oswald font-bold tracking-tighter uppercase text-white leading-none">
+                        Backs<br class="sm:hidden"> <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#418fde] to-[#0a1128]">Strike</span>
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav id="play-nav">
+        <div class="container mx-auto px-6 lg:px-12 py-3">
+            <div class="inner">
+                <a href="#all" data-play="all" class="pnav">All Plays</a>
+                <a href="#chiefs" data-play="chiefs" class="pnav">Chiefs</a>
+                <a href="#waratahs" data-play="waratahs" class="pnav">Waratahs</a>
+                <a href="#crusaders" data-play="crusaders" class="pnav">Crusaders</a>
+                <a href="#moana" data-play="moana" class="pnav">Moana</a>
+                <a href="#brumbies" data-play="brumbies" class="pnav">Brumbies</a>
+                <a href="#highlanders" data-play="highlanders" class="pnav">Highlanders</a>
+                <a href="#hurricanes" data-play="hurricanes" class="pnav">Hurricanes</a>
+                <a href="#blues" data-play="blues" class="pnav">Blues</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10 flex-grow">
+
+        <!-- Back link -->
+        <div class="container mx-auto px-6 lg:px-12 pt-6">
+            <a href="index.html" class="font-mono-tech text-xs uppercase tracking-widest text-neutral-500 hover:text-white">&larr; Barbarian System // Main Protocol</a>
+        </div>
+
+        <!-- Diagram key -->
+        <div class="container mx-auto px-6 lg:px-12 pt-8">
+            <div class="sharp-box p-4 flex flex-wrap gap-x-8 gap-y-2 items-center font-mono-tech text-xs uppercase tracking-wider text-neutral-400">
+                <span class="text-neutral-600">Key //</span>
+                <span class="flex items-center gap-2"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid #e5e5e5"></span> Back</span>
+                <span class="flex items-center gap-2"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid #ff9d2e"></span> 9</span>
+                <span class="flex items-center gap-2"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid #ff6b9d"></span> 11</span>
+                <span class="flex items-center gap-2"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid #418fde"></span> Forward</span>
+                <span class="flex items-center gap-2"><span style="display:inline-block;width:22px;border-top:2px dashed #e5e5e5"></span> Running line</span>
+                <span class="flex items-center gap-2"><span style="display:inline-block;width:22px;border-top:2px dotted #9ca3af"></span> Option</span>
+                <span class="flex items-center gap-2"><span style="display:inline-block;width:22px;border-top:3px solid #418fde"></span> Forward pop</span>
+            </div>
+        </div>
+
+        <!-- ============ 01 CHIEFS ============ -->
+        <section id="chiefs" class="py-16 border-b border-white/5">
+            <div class="container mx-auto px-6 lg:px-12">
+                <div class="flex items-end gap-4 mb-3 flex-wrap">
+                    <span class="font-mono-tech text-[#418fde] text-sm">01</span>
+                    <h2 class="font-oswald text-5xl md:text-7xl font-bold uppercase tracking-tighter text-white leading-none">Chiefs</h2>
+                    <div class="border border-[#b91c1c]/30 text-[#b91c1c] text-xs font-mono-tech px-2 py-1 uppercase bg-[#b91c1c]/10 mb-1">Scrum Strike</div>
+                </div>
+                <p class="font-mono-tech text-neutral-500 text-sm uppercase tracking-widest mb-3">Miss 10 // Square 12 // Out the back of 13</p>
+                <p class="text-neutral-300 font-inter text-lg font-light mb-8 max-w-3xl">9 misses 10 straight to 12, who stays square and takes it to the gain line. 10 folds in behind, comes out the back of 13's hard line, and 14 arrives on his outside for the shoulder ball.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="sharp-box p-2"><svg viewBox="0 0 1060 640" xmlns="http://www.w3.org/2000/svg" class="diagram" role="img" aria-label="Chiefs scrum strike diagram"><line class="touch" x1="18" y1="20" x2="18" y2="620"/><text class="touch-t" x="12" y="330" text-anchor="middle" transform="rotate(-90 12 330)">TOUCH</text><line class="dir" x1="1030" y1="600" x2="1030" y2="470"/><text class="dir-t" x="1020" y="535" text-anchor="middle" transform="rotate(-90 1020 535)">DIRECTION OF ATTACK</text><text class="head" x="40" y="44" text-anchor="start">CHIEFS // MISS 10, SQUARE 12, OUT THE BACK OF 13</text><g class="scrum"><rect x="99" y="109" width="100" height="126" rx="14"/><circle cx="127" cy="133" r="5" class="sc-dot"/><circle cx="149" cy="133" r="5" class="sc-dot"/><circle cx="171" cy="133" r="5" class="sc-dot"/><circle cx="116" cy="173" r="5" class="sc-dot"/><circle cx="138" cy="173" r="5" class="sc-dot"/><circle cx="160" cy="173" r="5" class="sc-dot"/><circle cx="182" cy="173" r="5" class="sc-dot"/><circle cx="149" cy="213" r="5" class="sc-dot"/><text x="149" y="97" text-anchor="middle" class="sc-lbl">SCRUM</text></g><text class="an" x="176" y="202" text-anchor="start">9 MISSES 10 — STRAIGHT TO 12</text><line class="run" x1="424" y1="301" x2="448" y2="250" marker-end="url(#ah-run)"/><text class="an" x="452" y="194" text-anchor="start">12 STAYS SQUARE TO THE GAIN LINE</text><text class="an" x="452" y="214" text-anchor="start">LITTLE KICK OUT</text><path class="run" d="M292 340 Q470 444 646 400" marker-end="url(#ah-run)"/><text class="an" x="58" y="384" text-anchor="start">10 FOLDS BEHIND 12, FINISHES OUTSIDE 13</text><path class="run" d="M584 349 L584 306 L486 274" marker-end="url(#ah-run)"/><text class="an" x="600" y="256" text-anchor="start">13 HARD LINE — FORWARD, THEN BACK IN</text><text class="an" x="664" y="342" text-anchor="start">10 OUT THE BACK OF 13</text><path class="run" d="M272 424 Q520 520 726 452 L726 384" marker-end="url(#ah-run)"/><text class="an" x="250" y="474" text-anchor="middle">11 SHADOWS 10 AND STRAIGHTENS UP</text><text class="an" x="250" y="492" text-anchor="middle">FOR A SHOULDER BALL</text><path class="opt" d="M542 552 Q640 494 700 434" marker-end="url(#ah-opt)"/><text class="an" x="542" y="610" text-anchor="middle">15 ACROSS THE FACE</text><line class="opt" x1="866" y1="404" x2="866" y2="350" marker-end="url(#ah-opt)"/><text class="an" x="866" y="462" text-anchor="middle">14 HOLDS THE WIDTH</text><g class="pl p-nine"><circle cx="146" cy="250" r="19"/><text x="146" y="255" text-anchor="middle">9</text></g><g class="pl p-back"><circle cx="284" cy="318" r="19"/><text x="284" y="323" text-anchor="middle">10</text></g><g class="pl p-back"><circle cx="417" cy="319" r="19"/><text x="417" y="324" text-anchor="middle">12</text></g><g class="pl p-back"><circle cx="584" cy="368" r="19"/><text x="584" y="373" text-anchor="middle">13</text></g><g class="pl p-elev"><circle cx="257" cy="435" r="19"/><text x="257" y="440" text-anchor="middle">11</text></g><g class="pl p-back"><circle cx="866" cy="423" r="19"/><text x="866" y="428" text-anchor="middle">14</text></g><g class="pl p-back"><circle cx="542" cy="571" r="19"/><text x="542" y="576" text-anchor="middle">15</text></g></svg></div>
+                    <div>
+                        <ul class="space-y-4 font-inter text-lg font-light text-neutral-300 mb-8"><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">9</strong> gives a straight pass to 12.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">10</strong> stands at first receiver and drops in behind 12.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">12</strong> stays square with a little kick out, taking the ball to the gain line.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">13</strong> comes on a hard line off 12.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">10</strong> comes out the back of 13.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">11</strong> shadows 10 and pops up on the outside for a shoulder ball.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">15</strong> is the across-the-face option; 11 can hit wide.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">14</strong> holds the width.</li></ul>
+                        <div class="grid grid-cols-1 gap-3 font-mono-tech text-sm">
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">When to call it</span><span class="text-neutral-400"> &mdash; This can be played against any style of defence, but we have to realise when to give ourselves extra time on the ball if they are blitzing.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Where</span><span class="text-neutral-400"> &mdash; Anywhere on the pitch, including open play. Playable off a left- or right-hand scrum.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Then&hellip;</span><span class="text-neutral-400"> &mdash; If we hit up the middle we play a 9K, and if we hit an edge we play a 9K back in field.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- ============ 02 WARATAHS ============ -->
+        <section id="waratahs" class="py-16 border-b border-white/5">
+            <div class="container mx-auto px-6 lg:px-12">
+                <div class="flex items-end gap-4 mb-3 flex-wrap">
+                    <span class="font-mono-tech text-[#418fde] text-sm">02</span>
+                    <h2 class="font-oswald text-5xl md:text-7xl font-bold uppercase tracking-tighter text-white leading-none">Waratahs</h2>
+                    <div class="border border-[#b91c1c]/30 text-[#b91c1c] text-xs font-mono-tech px-2 py-1 uppercase bg-[#b91c1c]/10 mb-1">Scrum Strike</div>
+                </div>
+                <p class="font-mono-tech text-neutral-500 text-sm uppercase tracking-widest mb-3">Chiefs set-up // 12 strikes 11 through the seam</p>
+                <p class="text-neutral-300 font-inter text-lg font-light mb-8 max-w-3xl">The same picture as Chiefs, but the ball leaves a phase earlier and the strike runner changes. 10 still slides out the back, only now as a decoy — 12 holds the ball and puts 11 through the seam that opens between where 13 starts and where 10 finishes.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="sharp-box p-2"><svg viewBox="0 0 1060 640" xmlns="http://www.w3.org/2000/svg" class="diagram" role="img" aria-label="Waratahs scrum strike diagram"><line class="touch" x1="18" y1="20" x2="18" y2="620"/><text class="touch-t" x="12" y="330" text-anchor="middle" transform="rotate(-90 12 330)">TOUCH</text><line class="dir" x1="1030" y1="600" x2="1030" y2="470"/><text class="dir-t" x="1020" y="535" text-anchor="middle" transform="rotate(-90 1020 535)">DIRECTION OF ATTACK</text><text class="head" x="40" y="44" text-anchor="start">WARATAHS // CHIEFS SET-UP — 12 STRIKES 11 THROUGH THE SEAM</text><g class="scrum"><rect x="99" y="109" width="100" height="126" rx="14"/><circle cx="127" cy="133" r="5" class="sc-dot"/><circle cx="149" cy="133" r="5" class="sc-dot"/><circle cx="171" cy="133" r="5" class="sc-dot"/><circle cx="116" cy="173" r="5" class="sc-dot"/><circle cx="138" cy="173" r="5" class="sc-dot"/><circle cx="160" cy="173" r="5" class="sc-dot"/><circle cx="182" cy="173" r="5" class="sc-dot"/><circle cx="149" cy="213" r="5" class="sc-dot"/><text x="149" y="97" text-anchor="middle" class="sc-lbl">SCRUM</text></g><text class="an" x="176" y="202" text-anchor="start">9 MISSES 10 — STRAIGHT TO 12</text><line class="run" x1="424" y1="301" x2="448" y2="250" marker-end="url(#ah-run)"/><text class="an" x="452" y="194" text-anchor="start">12 STAYS SQUARE TO THE GAIN LINE</text><text class="an" x="452" y="212" text-anchor="start">12 MAKES THE PASS</text><path class="run" d="M584 349 L584 306 L486 274" marker-end="url(#ah-run)"/><text class="an" x="600" y="256" text-anchor="start">13 HARD LINE — FORWARD, THEN BACK IN</text><path class="run" d="M292 340 Q470 444 646 400" marker-end="url(#ah-run)"/><text class="an" x="58" y="384" text-anchor="start">10 SLIDES OUT THE BACK AS A DECOY</text><text class="an" x="58" y="402" text-anchor="start">AND IS THE ACROSS-THE-FACE OPTION</text><path class="run" d="M266 420 Q440 402 606 396 L606 316" marker-end="url(#ah-run)"/><text class="an" x="257" y="476" text-anchor="middle">11 STRIKES THE SEAM</text><text class="an" x="257" y="494" text-anchor="middle">BETWEEN 13 AND 10</text><line class="opt" x1="866" y1="404" x2="866" y2="350" marker-end="url(#ah-opt)"/><text class="an" x="866" y="462" text-anchor="middle">14 HOLDS THE WIDTH</text><text class="an" x="866" y="480" text-anchor="middle">WIDE FOR THE CROSS-FIELD KICK</text><g class="pl p-nine"><circle cx="146" cy="250" r="19"/><text x="146" y="255" text-anchor="middle">9</text></g><g class="pl p-back"><circle cx="284" cy="318" r="19"/><text x="284" y="323" text-anchor="middle">10</text></g><g class="pl p-back"><circle cx="417" cy="319" r="19"/><text x="417" y="324" text-anchor="middle">12</text></g><g class="pl p-back"><circle cx="584" cy="368" r="19"/><text x="584" y="373" text-anchor="middle">13</text></g><g class="pl p-elev"><circle cx="257" cy="435" r="19"/><text x="257" y="440" text-anchor="middle">11</text></g><g class="pl p-back"><circle cx="866" cy="423" r="19"/><text x="866" y="428" text-anchor="middle">14</text></g><g class="pl p-back"><circle cx="542" cy="571" r="19"/><text x="542" y="576" text-anchor="middle">15</text></g></svg></div>
+                    <div>
+                        <ul class="space-y-4 font-inter text-lg font-light text-neutral-300 mb-8"><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">9</strong> gives a straight pass to 12, missing 10.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">12</strong> stays square to the gain line and makes the pass.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">13</strong> comes on a hard line off 12 — forward first, then back in.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">10</strong> slides out the back and away towards 13's outside, taking a defender with him — he is the across-the-face option.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">11</strong> runs the seam between where 13 starts and where 10 ends up.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">14</strong> holds the width, wide for the cross-field kick.</li></ul>
+                        <div class="grid grid-cols-1 gap-3 font-mono-tech text-sm">
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">When to call it</span><span class="text-neutral-400"> &mdash; Any style of defence — we just adjust our depth to fit.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Where</span><span class="text-neutral-400"> &mdash; Anywhere in the second and third thirds of the pitch.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Then&hellip;</span><span class="text-neutral-400"> &mdash; If we hit up the middle, forwards work around the corner for a 9K. If we hit an edge, forwards work back in field for a 9K.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- ============ 03 CRUSADERS ============ -->
+        <section id="crusaders" class="py-16 border-b border-white/5">
+            <div class="container mx-auto px-6 lg:px-12">
+                <div class="flex items-end gap-4 mb-3 flex-wrap">
+                    <span class="font-mono-tech text-[#418fde] text-sm">03</span>
+                    <h2 class="font-oswald text-5xl md:text-7xl font-bold uppercase tracking-tighter text-white leading-none">Crusaders</h2>
+                    <div class="border border-[#b91c1c]/30 text-[#b91c1c] text-xs font-mono-tech px-2 py-1 uppercase bg-[#b91c1c]/10 mb-1">Scrum Strike</div>
+                </div>
+                <p class="font-mono-tech text-neutral-500 text-sm uppercase tracking-widest mb-3">13 pulls the winger out // 14 hits the gap</p>
+                <p class="text-neutral-300 font-inter text-lg font-light mb-8 max-w-3xl">13 runs away from the ball to drag the defending winger with him, and 14 comes back the other way into the channel 13 has just emptied. 11 and 15 give 12 two closer options if the far side is covered.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="sharp-box p-2"><svg viewBox="0 0 1060 640" xmlns="http://www.w3.org/2000/svg" class="diagram" role="img" aria-label="Crusaders scrum strike diagram"><line class="touch" x1="18" y1="20" x2="18" y2="620"/><text class="touch-t" x="12" y="330" text-anchor="middle" transform="rotate(-90 12 330)">TOUCH</text><line class="dir" x1="1030" y1="600" x2="1030" y2="470"/><text class="dir-t" x="1020" y="535" text-anchor="middle" transform="rotate(-90 1020 535)">DIRECTION OF ATTACK</text><text class="head" x="40" y="44" text-anchor="start">CRUSADERS // 13 PULLS THE WINGER OUT, 14 HITS THE GAP</text><g class="scrum"><rect x="99" y="109" width="100" height="126" rx="14"/><circle cx="127" cy="133" r="5" class="sc-dot"/><circle cx="149" cy="133" r="5" class="sc-dot"/><circle cx="171" cy="133" r="5" class="sc-dot"/><circle cx="116" cy="173" r="5" class="sc-dot"/><circle cx="138" cy="173" r="5" class="sc-dot"/><circle cx="160" cy="173" r="5" class="sc-dot"/><circle cx="182" cy="173" r="5" class="sc-dot"/><circle cx="149" cy="213" r="5" class="sc-dot"/><text x="149" y="97" text-anchor="middle" class="sc-lbl">SCRUM</text></g><text class="an" x="176" y="202" text-anchor="start">9 TO 10, 10 TO 12</text><path class="run" d="M284 299 L284 262" marker-end="url(#ah-run)"/><path class="run" d="M417 300 L417 258" marker-end="url(#ah-run)"/><text class="an" x="417" y="236" text-anchor="middle">12 MAKES THE PASS</text><path class="run" d="M584 349 Q700 320 876 268" marker-end="url(#ah-run)"/><text class="an" x="900" y="240" text-anchor="end">13 WIDE LINE — OUTSIDE THE DEFENDING WINGER</text><path class="run" d="M852 408 Q744 372 662 256" marker-end="url(#ah-run)"/><text class="an" x="866" y="462" text-anchor="middle">14 RUNS HARD INTO</text><text class="an" x="866" y="480" text-anchor="middle">THE GAP 13 LEAVES</text><path class="run" d="M452 375 L448 326" marker-end="url(#ah-run)"/><text class="an" x="452" y="436" text-anchor="middle">11 SHORT SHOULDER</text><text class="an" x="452" y="454" text-anchor="middle">BALL OFF 12</text><path class="run" d="M622 417 L612 342" marker-end="url(#ah-run)"/><text class="an" x="622" y="490" text-anchor="middle">15 HOLDS HIS LINE JUST OUTSIDE 11</text><g class="pl p-nine"><circle cx="146" cy="250" r="19"/><text x="146" y="255" text-anchor="middle">9</text></g><g class="pl p-back"><circle cx="284" cy="318" r="19"/><text x="284" y="323" text-anchor="middle">10</text></g><g class="pl p-back"><circle cx="417" cy="319" r="19"/><text x="417" y="324" text-anchor="middle">12</text></g><g class="pl p-back"><circle cx="584" cy="368" r="19"/><text x="584" y="373" text-anchor="middle">13</text></g><g class="pl p-elev"><circle cx="452" cy="394" r="19"/><text x="452" y="399" text-anchor="middle">11</text></g><g class="pl p-back"><circle cx="866" cy="423" r="19"/><text x="866" y="428" text-anchor="middle">14</text></g><g class="pl p-back"><circle cx="622" cy="436" r="19"/><text x="622" y="441" text-anchor="middle">15</text></g></svg></div>
+                    <div>
+                        <ul class="space-y-4 font-inter text-lg font-light text-neutral-300 mb-8"><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">9</strong> passes to 10.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">10</strong> passes to 12.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">13</strong> runs a wide line, going outside the defending winger.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">11</strong> runs a short shoulder ball off 12.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">15</strong> holds his line just outside 11.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">14</strong> runs hard into the gap 13 has left open.</li></ul>
+                        <div class="grid grid-cols-1 gap-3 font-mono-tech text-sm">
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">When to call it</span><span class="text-neutral-400"> &mdash; Any style of defence — but we must adjust our depth if they blitz, and be aware of the intercept.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Where</span><span class="text-neutral-400"> &mdash; Second and third thirds of the pitch.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Then&hellip;</span><span class="text-neutral-400"> &mdash; The forwards always play a 9K around the corner and then a 9K back in field, allowing the backs time to get set to play back across the pitch.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- ============ 04 MOANA ============ -->
+        <section id="moana" class="py-16 border-b border-white/5">
+            <div class="container mx-auto px-6 lg:px-12">
+                <div class="flex items-end gap-4 mb-3 flex-wrap">
+                    <span class="font-mono-tech text-[#418fde] text-sm">04</span>
+                    <h2 class="font-oswald text-5xl md:text-7xl font-bold uppercase tracking-tighter text-white leading-none">Moana</h2>
+                    <div class="border border-[#b91c1c]/30 text-[#b91c1c] text-xs font-mono-tech px-2 py-1 uppercase bg-[#b91c1c]/10 mb-1">Scrum Strike // Blindside</div>
+                </div>
+                <p class="font-mono-tech text-neutral-500 text-sm uppercase tracking-widest mb-3">8 picks blind // Short side only</p>
+                <p class="text-neutral-300 font-inter text-lg font-light mb-8 max-w-3xl">We aim to get the scrum up on the right side. 8 picks blind fixing the flanker, 9 goes on the outside fixing the next defender, and then you have 15 and 14.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="sharp-box p-2"><svg viewBox="0 0 1060 640" xmlns="http://www.w3.org/2000/svg" class="diagram" role="img" aria-label="Moana scrum strike diagram"><line class="touch" x1="1042" y1="20" x2="1042" y2="620"/><text class="touch-t" x="1050" y="330" text-anchor="middle" transform="rotate(90 1050 330)">TOUCH</text><line class="dir" x1="36" y1="600" x2="36" y2="470"/><text class="dir-t" x="26" y="535" text-anchor="middle" transform="rotate(-90 26 535)">DIRECTION OF ATTACK</text><text class="head" x="1020" y="44" text-anchor="end">MOANA // 8 PICKS BLIND — RIGHT-HAND CHANNEL ONLY</text><g class="scrum"><rect x="764" y="119" width="100" height="126" rx="14"/><circle cx="792" cy="143" r="5" class="sc-dot"/><circle cx="814" cy="143" r="5" class="sc-dot"/><circle cx="836" cy="143" r="5" class="sc-dot"/><circle cx="781" cy="183" r="5" class="sc-dot"/><circle cx="803" cy="183" r="5" class="sc-dot"/><circle cx="825" cy="183" r="5" class="sc-dot"/><circle cx="847" cy="183" r="5" class="sc-dot"/><circle cx="814" cy="223" r="5" class="sc-dot"/><text x="814" y="107" text-anchor="middle" class="sc-lbl">SCRUM</text></g><text class="head2" x="1020" y="96" text-anchor="end">RIGHT-HAND TOUCH — SHORT SIDE</text><path class="run" d="M830 244 Q876 226 906 196" marker-end="url(#ah-run)"/><path class="run" d="M828 296 Q904 268 952 214" marker-end="url(#ah-run)"/><path class="run" d="M928 350 Q984 320 1006 258" marker-end="url(#ah-run)"/><line class="hard" x1="818" y1="274" x2="815" y2="288" marker-end="url(#ah-hard)"/><text class="an" x="752" y="236" text-anchor="end">8 PICKS BLIND, FIXING THE 6</text><text class="an" x="752" y="276" text-anchor="end">8 POPS TO 9</text><text class="an" x="740" y="318" text-anchor="end">9 RUNS OUTSIDE 8 — HAS 15 AND 14</text><text class="an" x="880" y="470" text-anchor="middle">15 STARTS BETWEEN 9 AND 14</text><text class="an" x="880" y="488" text-anchor="middle">AND RUNS OUTSIDE 9</text><line class="opt" x1="1020" y1="394" x2="1020" y2="340" marker-end="url(#ah-opt)"/><text class="an" x="1014" y="528" text-anchor="end">14 FLAT ON THE TOUCHLINE</text><path class="run" d="M583 387 L583 330 L668 292" marker-end="url(#ah-run)"/><path class="run" d="M468 365 L468 308 L560 270" marker-end="url(#ah-run)"/><text class="an" x="525" y="452" text-anchor="middle">12 &amp; 13 IN-LINES OFF 10</text><text class="an" x="525" y="470" text-anchor="middle">THE SECOND OPTION, AND NATURAL</text><text class="an" x="525" y="488" text-anchor="middle">SUPPORT IF THE BLIND BREAKS</text><line class="opt" x1="151" y1="412" x2="151" y2="358" marker-end="url(#ah-opt)"/><text class="an" x="151" y="478" text-anchor="middle">11 STRETCHES THE DEFENCE</text><g class="pl p-fwd"><circle cx="816" cy="255" r="19"/><text x="816" y="260" text-anchor="middle">8</text></g><g class="pl p-nine"><circle cx="814" cy="308" r="19"/><text x="814" y="313" text-anchor="middle">9</text></g><g class="pl p-back"><circle cx="683" cy="360" r="19"/><text x="683" y="365" text-anchor="middle">10</text></g><g class="pl p-back"><circle cx="583" cy="406" r="19"/><text x="583" y="411" text-anchor="middle">12</text></g><g class="pl p-back"><circle cx="468" cy="384" r="19"/><text x="468" y="389" text-anchor="middle">13</text></g><g class="pl p-back"><circle cx="1020" cy="413" r="19"/><text x="1020" y="418" text-anchor="middle">14</text></g><g class="pl p-back"><circle cx="912" cy="362" r="19"/><text x="912" y="367" text-anchor="middle">15</text></g><g class="pl p-elev"><circle cx="151" cy="430" r="19"/><text x="151" y="435" text-anchor="middle">11</text></g></svg></div>
+                    <div>
+                        <ul class="space-y-4 font-inter text-lg font-light text-neutral-300 mb-8"><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">8</strong> picks and goes blind, fixing the 6, and pops to 9.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">9</strong> gets the pop off 8 and has 15 and 14 as options.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">15</strong> starts wide, in the channel between 9 and 14, and runs outside 9.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">14</strong> holds flat and on the touchline.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">12</strong> runs an in-line off 10.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">13</strong> runs an in-line off 10.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">11</strong> always stretches the defence.</li></ul>
+                        <div class="grid grid-cols-1 gap-3 font-mono-tech text-sm">
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">When to call it</span><span class="text-neutral-400"> &mdash; If we have a scrum on the right-hand side of the pitch.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Where</span><span class="text-neutral-400"> &mdash; Any third of the pitch.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Then&hellip;</span><span class="text-neutral-400"> &mdash; Forwards play a quick 9K and we look to attack the other side of the pitch, as the defence will be on the back foot.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- ============ 05 BRUMBIES ============ -->
+        <section id="brumbies" class="py-16 border-b border-white/5">
+            <div class="container mx-auto px-6 lg:px-12">
+                <div class="flex items-end gap-4 mb-3 flex-wrap">
+                    <span class="font-mono-tech text-[#418fde] text-sm">05</span>
+                    <h2 class="font-oswald text-5xl md:text-7xl font-bold uppercase tracking-tighter text-white leading-none">Brumbies</h2>
+                    <div class="border border-[#b91c1c]/30 text-[#b91c1c] text-xs font-mono-tech px-2 py-1 uppercase bg-[#b91c1c]/10 mb-1">Scrum Strike</div>
+                </div>
+                <p class="font-mono-tech text-neutral-500 text-sm uppercase tracking-widest mb-3">9 off the 8 // Centres in, 10 out the back</p>
+                <p class="text-neutral-300 font-inter text-lg font-light mb-8 max-w-3xl">9 takes the pop off 8 with three pictures in front of him — crash 12, crash 13, or hit 10. Both centres run in off him, so 10 gets the ball out the back of a defence that has already turned.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="sharp-box p-2"><svg viewBox="0 0 1060 640" xmlns="http://www.w3.org/2000/svg" class="diagram" role="img" aria-label="Brumbies scrum strike diagram"><line class="touch" x1="18" y1="20" x2="18" y2="620"/><text class="touch-t" x="12" y="330" text-anchor="middle" transform="rotate(-90 12 330)">TOUCH</text><line class="dir" x1="1030" y1="600" x2="1030" y2="470"/><text class="dir-t" x="1020" y="535" text-anchor="middle" transform="rotate(-90 1020 535)">DIRECTION OF ATTACK</text><text class="head" x="40" y="44" text-anchor="start">BRUMBIES // 8 FLAT ACROSS, CENTRES IN, 10 OUT THE BACK</text><g class="scrum"><rect x="57" y="68" width="100" height="126" rx="14"/><circle cx="85" cy="92" r="5" class="sc-dot"/><circle cx="107" cy="92" r="5" class="sc-dot"/><circle cx="129" cy="92" r="5" class="sc-dot"/><circle cx="74" cy="132" r="5" class="sc-dot"/><circle cx="96" cy="132" r="5" class="sc-dot"/><circle cx="118" cy="132" r="5" class="sc-dot"/><circle cx="140" cy="132" r="5" class="sc-dot"/><circle cx="107" cy="172" r="5" class="sc-dot"/><text x="107" y="56" text-anchor="middle" class="sc-lbl">SCRUM</text></g><path class="run" d="M126 200 L258 200" marker-end="url(#ah-run)"/><path class="run" d="M124 247 L242 247" marker-end="url(#ah-run)"/><text class="an" x="300" y="164" text-anchor="start">8 RUNS FLAT ACROSS FROM THE SCRUM, 9 FOLLOWS JUST BEHIND</text><line class="hard" x1="266" y1="210" x2="254" y2="234" marker-end="url(#ah-hard)"/><text class="an" x="284" y="232" text-anchor="start">8 POPS TO 9</text><text class="an" x="58" y="288" text-anchor="start">9 CRASHES 12 OR 13 — OR HITS 10</text><path class="run" d="M399 344 L399 300 L296 266" marker-end="url(#ah-run)"/><path class="run" d="M548 380 L548 336 L430 292" marker-end="url(#ah-run)"/><text class="an" x="566" y="330" text-anchor="start">12 &amp; 13 OUT-TO-IN OFF 9</text><path class="run" d="M262 322 Q400 420 478 398" marker-end="url(#ah-run)"/><text class="an" x="296" y="466" text-anchor="start">10 OUT THE BACK OF THE CENTRES</text><path class="run" d="M150 336 Q300 384 452 412" marker-end="url(#ah-run)"/><text class="an" x="58" y="396" text-anchor="start">11 ARRIVES ON 10'S INSIDE SHOULDER</text><text class="an" x="432" y="610" text-anchor="middle">15 WIDE, EXPECTING THE BALL FROM 10</text><line class="opt" x1="843" y1="452" x2="843" y2="398" marker-end="url(#ah-opt)"/><text class="an" x="843" y="500" text-anchor="middle">14 HOLDS WIDE</text><g class="pl p-fwd"><circle cx="107" cy="200" r="19"/><text x="107" y="205" text-anchor="middle">8</text></g><g class="pl p-nine"><circle cx="106" cy="247" r="19"/><text x="106" y="252" text-anchor="middle">9</text></g><g class="pl p-back"><circle cx="245" cy="313" r="19"/><text x="245" y="318" text-anchor="middle">10</text></g><g class="pl p-back"><circle cx="399" cy="363" r="19"/><text x="399" y="368" text-anchor="middle">12</text></g><g class="pl p-back"><circle cx="548" cy="399" r="19"/><text x="548" y="404" text-anchor="middle">13</text></g><g class="pl p-back"><circle cx="843" cy="471" r="19"/><text x="843" y="476" text-anchor="middle">14</text></g><g class="pl p-back"><circle cx="432" cy="571" r="19"/><text x="432" y="576" text-anchor="middle">15</text></g><g class="pl p-elev"><circle cx="135" cy="342" r="19"/><text x="135" y="347" text-anchor="middle">11</text></g></svg></div>
+                    <div>
+                        <ul class="space-y-4 font-inter text-lg font-light text-neutral-300 mb-8"><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">9</strong> gets the pop off 8 and picks either a crash on 12 or 13, or hits 10.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">10</strong> runs a line out the back of the centres, with 11 as an inside option and 15 as the wide option.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">12</strong> runs an out-to-in line off 9.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">13</strong> runs an out-to-in line off 9.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">15</strong> runs a wide line expecting the ball from 10.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">11</strong> runs a line holding on the inside shoulder of 10.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">14</strong> holds the wide channel and reacts to the play — possible cross-field option.</li></ul>
+                        <div class="grid grid-cols-1 gap-3 font-mono-tech text-sm">
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">When to call it</span><span class="text-neutral-400"> &mdash; If the defence is tight and has a hard drift.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Where</span><span class="text-neutral-400"> &mdash; Anywhere on the pitch — but in the first third, only hit up the 12 and 13 to set a platform.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Then&hellip;</span><span class="text-neutral-400"> &mdash; In the first third we set up to exit. In the other two thirds, if we hit the middle the forwards work around the corner for a 9K; if we hit the edge the forwards take a 9K back in field.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- ============ 06 HIGHLANDERS ============ -->
+        <section id="highlanders" class="py-16 border-b border-white/5">
+            <div class="container mx-auto px-6 lg:px-12">
+                <div class="flex items-end gap-4 mb-3 flex-wrap">
+                    <span class="font-mono-tech text-[#418fde] text-sm">06</span>
+                    <h2 class="font-oswald text-5xl md:text-7xl font-bold uppercase tracking-tighter text-white leading-none">Highlanders</h2>
+                    <div class="border border-[#b91c1c]/30 text-[#b91c1c] text-xs font-mono-tech px-2 py-1 uppercase bg-[#b91c1c]/10 mb-1">Scrum Strike</div>
+                </div>
+                <p class="font-mono-tech text-neutral-500 text-sm uppercase tracking-widest mb-3">Switch in the middle // 15 out the back</p>
+                <p class="text-neutral-300 font-inter text-lg font-light mb-8 max-w-3xl">A switch between 10 and 12 turns the defence inward, 13 and 11 attack the seams either side of it, and 15 arrives out the back with the ball already past the first line of drift.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="sharp-box p-2"><svg viewBox="0 0 1060 640" xmlns="http://www.w3.org/2000/svg" class="diagram" role="img" aria-label="Highlanders scrum strike diagram"><line class="touch" x1="18" y1="20" x2="18" y2="620"/><text class="touch-t" x="12" y="330" text-anchor="middle" transform="rotate(-90 12 330)">TOUCH</text><line class="dir" x1="1030" y1="600" x2="1030" y2="470"/><text class="dir-t" x="1020" y="535" text-anchor="middle" transform="rotate(-90 1020 535)">DIRECTION OF ATTACK</text><text class="head" x="40" y="44" text-anchor="start">HIGHLANDERS // SWITCH &amp; OUT THE BACK</text><g class="scrum"><rect x="57" y="68" width="100" height="126" rx="14"/><circle cx="85" cy="92" r="5" class="sc-dot"/><circle cx="107" cy="92" r="5" class="sc-dot"/><circle cx="129" cy="92" r="5" class="sc-dot"/><circle cx="74" cy="132" r="5" class="sc-dot"/><circle cx="96" cy="132" r="5" class="sc-dot"/><circle cx="118" cy="132" r="5" class="sc-dot"/><circle cx="140" cy="132" r="5" class="sc-dot"/><circle cx="107" cy="172" r="5" class="sc-dot"/><text x="107" y="56" text-anchor="middle" class="sc-lbl">SCRUM</text></g><path class="run" d="M242 294 L242 258 L330 216" marker-end="url(#ah-run)"/><path class="run" d="M394 345 L394 292 L268 226" marker-end="url(#ah-run)"/><text class="an" x="300" y="194" text-anchor="middle">10 &amp; 12 SWITCH</text><path class="run" d="M545 383 L545 338 L424 300" marker-end="url(#ah-run)"/><text class="an" x="566" y="350" text-anchor="start">13 OUT-TO-IN, TIGHT TO 10</text><path class="run" d="M429 551 Q530 500 600 430" marker-end="url(#ah-run)"/><text class="an" x="452" y="528" text-anchor="start">15 OUT THE BACK, BOUNCING BEHIND 13</text><path class="run" d="M190 382 Q254 356 306 340 L306 268" marker-end="url(#ah-run)"/><text class="an" x="60" y="448" text-anchor="start">11 J LINE INTO THE 10 / 12 GAP</text><line class="opt" x1="837" y1="445" x2="837" y2="392" marker-end="url(#ah-opt)"/><text class="an" x="858" y="470" text-anchor="start">14 HOLDS WIDE</text><g class="pl p-nine"><circle cx="113" cy="237" r="19"/><text x="113" y="242" text-anchor="middle">9</text></g><g class="pl p-back"><circle cx="242" cy="313" r="19"/><text x="242" y="318" text-anchor="middle">10</text></g><g class="pl p-back"><circle cx="394" cy="364" r="19"/><text x="394" y="369" text-anchor="middle">12</text></g><g class="pl p-back"><circle cx="545" cy="402" r="19"/><text x="545" y="407" text-anchor="middle">13</text></g><g class="pl p-back"><circle cx="837" cy="464" r="19"/><text x="837" y="469" text-anchor="middle">14</text></g><g class="pl p-elev"><circle cx="178" cy="396" r="19"/><text x="178" y="401" text-anchor="middle">11</text></g><g class="pl p-back"><circle cx="429" cy="570" r="19"/><text x="429" y="575" text-anchor="middle">15</text></g></svg></div>
+                    <div>
+                        <ul class="space-y-4 font-inter text-lg font-light text-neutral-300 mb-8"><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">10</strong> runs a switch with 12, then looks for the best option.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">12</strong> runs the switch line off 10.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">13</strong> runs an out-to-in line, tight to 10.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">15</strong> runs an out-the-back line, bouncing behind 13.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">11</strong> runs a J line into the gap created between 10 and 12.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">14</strong> holds the wide channel and reacts to the play — possible cross-field option.</li></ul>
+                        <div class="grid grid-cols-1 gap-3 font-mono-tech text-sm">
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">When to call it</span><span class="text-neutral-400"> &mdash; The 12 switch option and the 13 hard line will either hold the drift, opening space on the outside, or the gap will open up because they have drifted too hard.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Where</span><span class="text-neutral-400"> &mdash; Middle third of the pitch.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Then&hellip;</span><span class="text-neutral-400"> &mdash; If we hit the middle channel, forwards work around the corner for a 9K. If we hit an edge, forwards work for a 9K back in field.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- ============ 07 HURRICANES ============ -->
+        <section id="hurricanes" class="py-16 border-b border-white/5">
+            <div class="container mx-auto px-6 lg:px-12">
+                <div class="flex items-end gap-4 mb-3 flex-wrap">
+                    <span class="font-mono-tech text-[#418fde] text-sm">07</span>
+                    <h2 class="font-oswald text-5xl md:text-7xl font-bold uppercase tracking-tighter text-white leading-none">Hurricanes</h2>
+                    <div class="border border-[#b91c1c]/30 text-[#b91c1c] text-xs font-mono-tech px-2 py-1 uppercase bg-[#b91c1c]/10 mb-1">Scrum Strike</div>
+                </div>
+                <p class="font-mono-tech text-neutral-500 text-sm uppercase tracking-widest mb-3">Out the back twice // 11 then 15</p>
+                <p class="text-neutral-300 font-inter text-lg font-light mb-8 max-w-3xl">Two out-the-backs in a row. 12 and 13 run hard lines that have to be respected, the ball goes behind each of them in turn, and by the time 14 gets it the defence has been beaten twice inside.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="sharp-box p-2"><svg viewBox="0 0 1060 640" xmlns="http://www.w3.org/2000/svg" class="diagram" role="img" aria-label="Hurricanes scrum strike diagram"><line class="touch" x1="18" y1="20" x2="18" y2="620"/><text class="touch-t" x="12" y="330" text-anchor="middle" transform="rotate(-90 12 330)">TOUCH</text><line class="dir" x1="1030" y1="600" x2="1030" y2="470"/><text class="dir-t" x="1020" y="535" text-anchor="middle" transform="rotate(-90 1020 535)">DIRECTION OF ATTACK</text><text class="head" x="40" y="44" text-anchor="start">HURRICANES // OUT THE BACK TWICE — 11 THEN 15</text><g class="scrum"><rect x="74" y="90" width="100" height="126" rx="14"/><circle cx="102" cy="114" r="5" class="sc-dot"/><circle cx="124" cy="114" r="5" class="sc-dot"/><circle cx="146" cy="114" r="5" class="sc-dot"/><circle cx="91" cy="154" r="5" class="sc-dot"/><circle cx="113" cy="154" r="5" class="sc-dot"/><circle cx="135" cy="154" r="5" class="sc-dot"/><circle cx="157" cy="154" r="5" class="sc-dot"/><circle cx="124" cy="194" r="5" class="sc-dot"/><text x="124" y="78" text-anchor="middle" class="sc-lbl">SCRUM</text></g><path class="run" d="M245 271 L245 252 L296 226" marker-end="url(#ah-run)"/><path class="run" d="M384 325 L384 254 L318 218" marker-end="url(#ah-run)"/><path class="run" d="M571 383 L571 300 L470 260" marker-end="url(#ah-run)"/><path class="run" d="M240 386 Q370 406 478 392 L478 296" marker-end="url(#ah-run)"/><path class="run" d="M396 446 Q560 430 756 388" marker-end="url(#ah-run)"/><line class="opt" x1="823" y1="425" x2="823" y2="372" marker-end="url(#ah-opt)"/><text class="an" x="60" y="268" text-anchor="start">10 → 11 OUT THE BACK OF 12</text><text class="an" x="250" y="340" text-anchor="end">12 HARD LINE OFF 10</text><text class="an" x="571" y="452" text-anchor="middle">13 HARD LINE OFF 11</text><text class="an" x="234" y="436" text-anchor="middle">11 → 15 OUT THE BACK OF 13</text><text class="an" x="200" y="454" text-anchor="middle">UNDER 12, THEN STRAIGHT UP BETWEEN 12 &amp; 13</text><text class="an" x="387" y="514" text-anchor="middle">15 FINISHES OUTSIDE 11</text><text class="an" x="823" y="486" text-anchor="middle">14 PLAYS OFF 15</text><text class="an" x="60" y="560" text-anchor="start">CANCEL // HIT 12 OR 13 UP</text><text class="an" x="60" y="578" text-anchor="start">OR CROSS-FIELD KICK TO 11</text><g class="pl p-nine"><circle cx="126" cy="234" r="19"/><text x="126" y="239" text-anchor="middle">9</text></g><g class="pl p-back"><circle cx="245" cy="290" r="19"/><text x="245" y="295" text-anchor="middle">10</text></g><g class="pl p-back"><circle cx="384" cy="344" r="19"/><text x="384" y="349" text-anchor="middle">12</text></g><g class="pl p-back"><circle cx="571" cy="402" r="19"/><text x="571" y="407" text-anchor="middle">13</text></g><g class="pl p-back"><circle cx="823" cy="444" r="19"/><text x="823" y="449" text-anchor="middle">14</text></g><g class="pl p-back"><circle cx="387" cy="462" r="19"/><text x="387" y="467" text-anchor="middle">15</text></g><g class="pl p-elev"><circle cx="234" cy="399" r="19"/><text x="234" y="404" text-anchor="middle">11</text></g></svg></div>
+                    <div>
+                        <ul class="space-y-4 font-inter text-lg font-light text-neutral-300 mb-8"><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">12</strong> runs a hard line off 10.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">10</strong> plays 11 out the back of 12.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">13</strong> runs a hard line off 11.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">11</strong> plays 15 out the back of 13.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">14</strong> holds his width, playing off 15.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">12 and 13</strong> are to always run these lines.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> If they read it — cancel and hit 12 or 13 up, or go out the back of them to 15. A cross-field kick to 11 is the other out.</li></ul>
+                        <div class="grid grid-cols-1 gap-3 font-mono-tech text-sm">
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">When to call it</span><span class="text-neutral-400"> &mdash; If the defence is either a hard drift or they hard press.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Where</span><span class="text-neutral-400"> &mdash; Middle third, and from a scrum on either edge.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Then&hellip;</span><span class="text-neutral-400"> &mdash; If we hit up the middle, forwards work around the corner for a 9K. If we hit an edge, forwards set for a 9K back in field.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- ============ 08 BLUES ============ -->
+        <section id="blues" class="py-16 border-b border-white/5">
+            <div class="container mx-auto px-6 lg:px-12">
+                <div class="flex items-end gap-4 mb-3 flex-wrap">
+                    <span class="font-mono-tech text-[#418fde] text-sm">08</span>
+                    <h2 class="font-oswald text-5xl md:text-7xl font-bold uppercase tracking-tighter text-white leading-none">Blues</h2>
+                    <div class="border border-[#b91c1c]/30 text-[#b91c1c] text-xs font-mono-tech px-2 py-1 uppercase bg-[#b91c1c]/10 mb-1">Scrum Strike // Two-way</div>
+                </div>
+                <p class="font-mono-tech text-neutral-500 text-sm uppercase tracking-widest mb-3">Same picture // Goes either way</p>
+                <p class="text-neutral-300 font-inter text-lg font-light mb-8 max-w-3xl">One shape, two directions. Both centres run in-lines that fix the flanker, the 9 and the 8, and 10 goes early behind whichever one the call sends him to.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="sharp-box p-2"><svg viewBox="0 0 1060 640" xmlns="http://www.w3.org/2000/svg" class="diagram" role="img" aria-label="Blues scrum strike diagram"><line class="touch" x1="18" y1="20" x2="18" y2="620"/><text class="touch-t" x="12" y="330" text-anchor="middle" transform="rotate(-90 12 330)">TOUCH</text><line class="dir" x1="1030" y1="600" x2="1030" y2="470"/><text class="dir-t" x="1020" y="535" text-anchor="middle" transform="rotate(-90 1020 535)">DIRECTION OF ATTACK</text><text class="head" x="40" y="44" text-anchor="start">BLUES // TWO-WAY — 9 HITS 12 OR 13, 10 WRAPS UNDERNEATH</text><g class="scrum"><rect x="463" y="110" width="100" height="126" rx="14"/><circle cx="491" cy="134" r="5" class="sc-dot"/><circle cx="513" cy="134" r="5" class="sc-dot"/><circle cx="535" cy="134" r="5" class="sc-dot"/><circle cx="480" cy="174" r="5" class="sc-dot"/><circle cx="502" cy="174" r="5" class="sc-dot"/><circle cx="524" cy="174" r="5" class="sc-dot"/><circle cx="546" cy="174" r="5" class="sc-dot"/><circle cx="513" cy="214" r="5" class="sc-dot"/><text x="513" y="98" text-anchor="middle" class="sc-lbl">SCRUM</text></g><line class="axis" x1="513" y1="256" x2="513" y2="600"/><text class="an" x="513" y="610" text-anchor="middle">SAME SET-UP BOTH WAYS</text><line class="hard" x1="506" y1="250" x2="503" y2="256" marker-end="url(#ah-hard)"/><path class="run" d="M278 379 L278 300 L351 234" marker-end="url(#ah-run)"/><path class="run" d="M706 370 L706 296 L628 234" marker-end="url(#ah-run)"/><text class="an" x="440" y="210" text-anchor="end">12 IN-LINE — FIXES FLANKER, 9 &amp; 8</text><text class="an" x="590" y="210" text-anchor="start">13 IN-LINE — FIXES FLANKER, 9 &amp; 8</text><path class="run" d="M482 372 Q356 424 232 366" marker-end="url(#ah-run)"/><path class="run" d="M516 372 Q648 424 772 366" marker-end="url(#ah-run)"/><text class="an" x="499" y="410" text-anchor="middle">10 WRAPS AROUND UNDERNEATH AND TAKES IT BACK</text><text class="an" x="503" y="306" text-anchor="middle">9 HITS 12 OR 13</text><text class="an" x="503" y="324" text-anchor="middle">9 FOLLOWS HIS PASS — ALWAYS AN INSIDE OPTION FOR 10</text><path class="opt" d="M476 494 Q420 460 342 442" marker-end="url(#ah-opt)"/><path class="opt" d="M508 494 Q600 460 676 442" marker-end="url(#ah-opt)"/><text class="an" x="492" y="558" text-anchor="middle">15 SETS EARLIER — NARROW OR WIDE SUPPORT</text><line class="opt" x1="40" y1="418" x2="40" y2="364" marker-end="url(#ah-opt)"/><text class="an" x="72" y="480" text-anchor="middle">11 HOLDS WIDTH</text><line class="opt" x1="966" y1="452" x2="966" y2="398" marker-end="url(#ah-opt)"/><text class="an" x="966" y="512" text-anchor="middle">14 HOLDS WIDTH</text><g class="pl p-fwd"><circle cx="506" cy="231" r="19"/><text x="506" y="236" text-anchor="middle">8</text></g><g class="pl p-nine"><circle cx="503" cy="274" r="19"/><text x="503" y="279" text-anchor="middle">9</text></g><g class="pl p-back"><circle cx="499" cy="363" r="19"/><text x="499" y="368" text-anchor="middle">10</text></g><g class="pl p-back"><circle cx="278" cy="398" r="19"/><text x="278" y="403" text-anchor="middle">12</text></g><g class="pl p-back"><circle cx="706" cy="389" r="19"/><text x="706" y="394" text-anchor="middle">13</text></g><g class="pl p-back"><circle cx="966" cy="470" r="19"/><text x="966" y="475" text-anchor="middle">14</text></g><g class="pl p-back"><circle cx="492" cy="510" r="19"/><text x="492" y="515" text-anchor="middle">15</text></g><g class="pl p-elev"><circle cx="40" cy="436" r="19"/><text x="40" y="441" text-anchor="middle">11</text></g></svg></div>
+                    <div>
+                        <ul class="space-y-4 font-inter text-lg font-light text-neutral-300 mb-8"><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">9</strong> — going right, scoots and fixes the 7. Going left, gets the pop off the floor from 8.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">10</strong> has to go early, receiving the ball behind either 12 or 13.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">12</strong> runs an in-line, fixing the flanker, 9 and 8.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">13</strong> runs an in-line, fixing the flanker, 9 and 8.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">15</strong> has to set off slightly earlier than 10, picking his support line either narrow or wide.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">11</strong> holds the width.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">14</strong> holds the width.</li><li class="flex gap-4 border-b border-white/10 pb-3"><span class="font-mono-tech text-xs text-[#418fde] pt-2">&#9656;</span> <strong class="text-white font-bold">9</strong> follows his pass — he is always an inside option for 10.</li></ul>
+                        <div class="grid grid-cols-1 gap-3 font-mono-tech text-sm">
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">When to call it</span><span class="text-neutral-400"> &mdash; If we have a scrum in the middle of the pitch.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Where</span><span class="text-neutral-400"> &mdash; Second and third thirds only.</span></div>
+                            <div class="sharp-box p-4 hover-target"><span class="text-[#418fde] font-bold">Then&hellip;</span><span class="text-neutral-400"> &mdash; If we hit the middle, forwards work open with a 9K. If we hit an edge, forwards work for a 9K back inside.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="py-12 text-center border-t border-white/10 bg-[#070707]">
+        <div class="container mx-auto px-6">
+            <p class="font-mono-tech text-neutral-600 text-xs tracking-widest uppercase">
+                Hove RFC &copy; 2026 // Barbarian Attack Protocol // Strictly Confidential
+            </p>
+        </div>
+    </footer>
+
+    <script>
+    /* COACH EDIT MODE — open with ?edit on the end of the URL */
+    (function () {
+        var KEY = 'barbarian-edits-v2::' + location.pathname;
+        var REGIONS = ['header', 'main', 'footer'];
+        try {
+            var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+            if (saved) REGIONS.forEach(function (sel) {
+                var el = document.querySelector(sel);
+                if (el && typeof saved[sel] === 'string') el.innerHTML = saved[sel];
+            });
+        } catch (e) {}
+        if (!new URLSearchParams(location.search).has('edit')) return;
+        var editing = false;
+        var bar = document.createElement('div');
+        bar.id = 'edit-toolbar';
+        bar.innerHTML = '<span class="status" id="edit-status"></span>' +
+            '<button id="btn-edit" type="button">Editing: Off</button>' +
+            '<button id="btn-download" type="button">Download HTML</button>' +
+            '<button id="btn-reset" type="button">Reset</button>';
+        document.body.appendChild(bar);
+        var btnEdit = document.getElementById('btn-edit');
+        var btnDownload = document.getElementById('btn-download');
+        var btnReset = document.getElementById('btn-reset');
+        var status = document.getElementById('edit-status');
+        var statusTimer;
+        function flash(msg) {
+            status.textContent = msg;
+            clearTimeout(statusTimer);
+            statusTimer = setTimeout(function () { status.textContent = ''; }, 1800);
+        }
+        function setEditing(on) {
+            editing = on;
+            REGIONS.forEach(function (sel) {
+                var el = document.querySelector(sel);
+                if (el) el.contentEditable = on ? 'true' : 'false';
+            });
+            btnEdit.textContent = on ? 'Editing: On' : 'Editing: Off';
+        }
+        function save() {
+            var data = {};
+            REGIONS.forEach(function (sel) {
+                var el = document.querySelector(sel);
+                if (el) data[sel] = el.innerHTML;
+            });
+            localStorage.setItem(KEY, JSON.stringify(data));
+            flash('Saved');
+        }
+        var saveTimer;
+        document.addEventListener('input', function () {
+            if (!editing) return;
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(save, 400);
+        });
+        btnEdit.addEventListener('click', function () { setEditing(!editing); });
+        btnDownload.addEventListener('click', function () {
+            var wasEditing = editing;
+            if (wasEditing) setEditing(false);
+            save();
+            var doc = document.documentElement.cloneNode(true);
+            doc.querySelectorAll('style:not(#core-styles)').forEach(function (s) { s.remove(); });
+            var tb = doc.querySelector('#edit-toolbar');
+            if (tb) tb.remove();
+            doc.querySelectorAll('[contenteditable]').forEach(function (el) { el.removeAttribute('contenteditable'); });
+            var html = '<!DOCTYPE html>\n' + doc.outerHTML;
+            var blob = new Blob([html], { type: 'text/html' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'scrum.html';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            flash('Exported');
+            if (wasEditing) setEditing(true);
+        });
+        var armed = false, armTimer;
+        btnReset.addEventListener('click', function () {
+            if (!armed) {
+                armed = true;
+                btnReset.textContent = 'Sure?';
+                btnReset.classList.add('armed');
+                armTimer = setTimeout(function () {
+                    armed = false;
+                    btnReset.textContent = 'Reset';
+                    btnReset.classList.remove('armed');
+                }, 3000);
+                return;
+            }
+            clearTimeout(armTimer);
+            localStorage.removeItem(KEY);
+            location.search = 'edit';
+            location.reload();
+        });
+    })();
+    </script>
+
+    <script>
+    /* PLAY FILTER — show a single play (or all) based on the URL hash */
+    (function () {
+        var PLAYS = ['chiefs', 'waratahs', 'crusaders', 'moana', 'brumbies', 'highlanders', 'hurricanes', 'blues'];
+        function current() {
+            var h = (location.hash || '').replace('#', '');
+            return PLAYS.indexOf(h) !== -1 ? h : 'all';
+        }
+        function apply() {
+            var id = current(), showAll = (id === 'all');
+            PLAYS.forEach(function (p) {
+                var sec = document.getElementById(p);
+                if (sec) sec.style.display = (showAll || p === id) ? '' : 'none';
+            });
+            var nav = document.getElementById('play-nav');
+            if (nav) nav.querySelectorAll('.pnav').forEach(function (a) {
+                a.classList.toggle('nav-active', a.getAttribute('data-play') === id);
+            });
+            if (!showAll) window.scrollTo(0, 0);
+        }
+        window.addEventListener('hashchange', apply);
+        apply();
+    })();
+    </script>
+
+</body>
+</html>
